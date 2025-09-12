@@ -23,14 +23,16 @@ public class Constants {
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .xVelocity(44.3932)
-            .yVelocity(32.7736)
-            .forwardZeroPowerAcceleration(-38.3475)
-            .lateralZeroPowerAcceleration(-47.4607);
+            .xVelocity(41.6852)
+            .yVelocity(32.1864);
+
+
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(6.078);
+            .mass(6.078)
+            .lateralZeroPowerAcceleration(-45.6052)
+            .forwardZeroPowerAcceleration(-35.361);
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(-6.25)
+            .forwardPodY(-6.5)
             .strafePodX(0)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
