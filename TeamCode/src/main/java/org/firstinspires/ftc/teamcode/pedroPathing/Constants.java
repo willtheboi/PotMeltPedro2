@@ -32,7 +32,7 @@ public class Constants {
             .lateralZeroPowerAcceleration(-45.6052)
             .forwardZeroPowerAcceleration(-35.361);
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(-6.5)
+            .forwardPodY(-8)
             .strafePodX(0)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
