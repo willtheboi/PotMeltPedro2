@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
+import com.pedropathing.control.PIDFCoefficients;
+import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
@@ -14,7 +16,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
     public static MecanumConstants driveConstants = new MecanumConstants()
-            .maxPower(1)
             .rightFrontMotorName("rf")
             .rightRearMotorName("rr")
             .leftRearMotorName("lr")
@@ -30,9 +31,13 @@ public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(6.078)
             .lateralZeroPowerAcceleration(-45.6052)
-            .forwardZeroPowerAcceleration(-35.361);
+            .forwardZeroPowerAcceleration(-35.361)
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.4, 0, 0.03, 0))
+            .headingPIDFCoefficients(new PIDFCoefficients(2, 0, 0.1, 0))
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.01,0,0.0001,0,0.0))
+            .centripetalScaling(0.0005);
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(-6.5)
+            .forwardPodY(-8)
             .strafePodX(0)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
