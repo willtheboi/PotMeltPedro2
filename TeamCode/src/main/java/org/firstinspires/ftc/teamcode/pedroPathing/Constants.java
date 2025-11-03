@@ -38,7 +38,7 @@ public class Constants {
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.01,0,0.0001,0,0.0))
             .centripetalScaling(0.0005);
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(-8)
+            .forwardPodY(-4)
             .strafePodX(0)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
