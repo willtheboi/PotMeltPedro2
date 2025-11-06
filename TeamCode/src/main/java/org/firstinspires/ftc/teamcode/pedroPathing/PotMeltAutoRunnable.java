@@ -12,17 +12,18 @@ public class PotMeltAutoRunnable extends PotMeltAuto {
         telemetry.update();
 
         // Example: Add logic here if you want to control arms, intake, etc.
-        /*
+
         switch (getPathState()) {
-            case 1:
+            case 0:
                 // Intake on
-                intakeMotor.setPower(1.0);
+                //follower.followPath(scorePreload);
+                setPathState(1);
                 break;
-            case 3:
+            case 1:
                 // Intake off
-                intakeMotor.setPower(0);
+
                 break;
         }
-        */
+
     }
 }

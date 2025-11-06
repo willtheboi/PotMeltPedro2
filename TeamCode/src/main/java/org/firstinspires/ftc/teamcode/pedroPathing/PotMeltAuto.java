@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 public abstract class PotMeltAuto extends OpMode {
     DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
-    DcMotor intakeL, intakeR;
+    DcMotor intake;
     CRServo outake1, outake2;
     DcMotor launcherL, launcherR;
     CRServo feederL, feederR;
@@ -20,8 +20,8 @@ public abstract class PotMeltAuto extends OpMode {
     private Timer pathTimer, opmodeTimer;
     private int pathState;
 
-    private final Pose startPose = new Pose(28.5, 128, Math.toRadians(180));
-    private final Pose scorePose = new Pose(60, 85, Math.toRadians(135));
+    private final Pose startPose = new Pose(111, 9, Math.toRadians(90));
+    private final Pose scorePose = new Pose(38, 33.5, Math.toRadians(180));
     private final Pose pickup1Pose = new Pose(37, 121, Math.toRadians(0));
     private final Pose pickup2Pose = new Pose(43, 130, Math.toRadians(0));
     private final Pose pickup3Pose = new Pose(49, 135, Math.toRadians(0));
@@ -66,8 +66,7 @@ public abstract class PotMeltAuto extends OpMode {
 
     @Override
     public void init() {
-        intakeL = hardwareMap.get(DcMotor.class, "intakeL");
-        intakeR = hardwareMap.get(DcMotor.class, "intakeR");
+        intake = hardwareMap.get(DcMotor.class, "intake");
         outake1 = hardwareMap.get(CRServo.class, "outake1");
         outake2 = hardwareMap.get(CRServo.class, "outake2");
         launcherL = hardwareMap.get(DcMotor.class, "launcherL");
@@ -94,9 +93,9 @@ public abstract class PotMeltAuto extends OpMode {
         switch (pathState) {
             case 0:
                 follower.followPath(scorePreload);
-                setPathState(1);
+                setPathState(-1);
                 break;
-            case 1:
+            /*case 1:
                 if (!follower.isBusy()) {
                     follower.followPath(grabPickup1, true);
                     setPathState(2);
@@ -137,7 +136,7 @@ public abstract class PotMeltAuto extends OpMode {
                 if (!follower.isBusy()) {
                     setPathState(-1); // End state
                 }
-                break;
+                break;*/
         }
     }
 
