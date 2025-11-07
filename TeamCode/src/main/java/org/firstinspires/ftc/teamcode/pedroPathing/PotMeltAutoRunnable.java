@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
+import android.os.SystemClock;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 @Autonomous(name = "PotMelt Auto (Runnable)", group = "Autonomous")
@@ -12,17 +14,15 @@ public class PotMeltAutoRunnable extends PotMeltAuto {
         telemetry.update();
 
         // Example: Add logic here if you want to control arms, intake, etc.
-        /*
+
         switch (getPathState()) {
             case 1:
-                // Intake on
-                intakeMotor.setPower(1.0);
-                break;
+                launcherL.setPower(1.0);
+                SystemClock.sleep(200);
             case 3:
-                // Intake off
-                intakeMotor.setPower(0);
+                launcherL.setPower(0);
                 break;
         }
-        */
+
     }
 }
