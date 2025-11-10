@@ -4,6 +4,7 @@ import android.os.SystemClock;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
@@ -22,18 +23,18 @@ public abstract class PotMeltAuto extends OpMode {
     private Timer pathTimer, opmodeTimer;
     private int pathState;
 
-    private final Pose startPose = new Pose(38.6, 33.2, Math.toRadians(180));
-    private final Pose scorePose = new Pose(120, 72.9, Math.toRadians(135));
+    private final Pose startPose = new Pose(63.3, 5.7, Math.toRadians(90));
+    private final Pose control = new Pose(43.9, 46.2);
+    private final Pose scorePose = new Pose(73.4, 76.5, Math.toRadians(230));
     private final Pose pickup1Pose = new Pose(37, 121, Math.toRadians(0));
     private final Pose pickup2Pose = new Pose(43, 130, Math.toRadians(0));
     private final Pose pickup3Pose = new Pose(49, 135, Math.toRadians(0));
-
 
     private Path scorePreload;
     private PathChain grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
 
     public void buildPaths() {
-        scorePreload = new Path(new BezierLine(startPose, scorePose));
+        scorePreload = new Path(new BezierCurve(startPose, control, scorePose));
         scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
 
         grabPickup1 = follower.pathBuilder()
@@ -69,7 +70,6 @@ public abstract class PotMeltAuto extends OpMode {
 
     @Override
     public void init() {
-
         intake = hardwareMap.get(DcMotor.class, "intake");
         outake1 = hardwareMap.get(CRServo.class, "outake1");
         outake2 = hardwareMap.get(CRServo.class, "outake2");
@@ -97,80 +97,62 @@ public abstract class PotMeltAuto extends OpMode {
         switch (pathState) {
             case 0:
                 follower.followPath(scorePreload);
+
                 setPathState(1);
                 break;
             case 1:
-              /*  if (!follower.isBusy()) {
-                 //   follower.followPath(grabPickup1, true);
-                    launcherR.setPower(-1.0);
-                    launcherL.setPower(1.0);
-                    SystemClock.sleep(5000);
-                    outake1.setPower(-1);
-                    outake2.setPower(1);
-                    feederL.setPower(-1);
-                    SystemClock.sleep(3000);
-                    feederL.setPower(0);
-                    outake1.setPower(0);
-                    outake2.setPower(0);
-                    launcherL.setPower(0);
-                    launcherR.setPower(0);
-                    SystemClock.sleep(1000);                    feederL.setPower(-1);
-                    feederR.setPower(-1);
+                if (!follower.isBusy()) {
+                    launcherL.setPower(1);
+                    launcherR.setPower(-1);
                     SystemClock.sleep(2000);
-                    feederL.setPower(0);
-                    feederR.setPower(0);
-                    SystemClock.sleep(700);
-                    launcherR.setPower(-1.0);
-                    launcherL.setPower(1.0);
-                    SystemClock.sleep(5000);
-                    outake1.setPower(-1);
-                    outake2.setPower(1);
-                    SystemClock.sleep(3000);
-                    outake1.setPower(0);
-                    outake2.setPower(0);
+                    feederL.setPower(-1);
+                    outake1.setPower(1);
+                    outake2.setPower(-1);
+                    SystemClock.sleep(2000);
                     launcherL.setPower(0);
                     launcherR.setPower(0);
-                    setPathState(2);
+                    feederL.setPower(0);
+                    outake1.setPower(0);
+                    outake2.setPower(0);
+                    setPathState(-1);
                 }
                 break;
-            case 2:
+            /*case 2:
                 if (!follower.isBusy()) {
-                //    follower.followPath(scorePickup1, true);
+                    follower.followPath(scorePickup1, true);
                     setPathState(3);
                 }
                 break;
             case 3:
                 if (!follower.isBusy()) {
-                  //  follower.followPath(grabPickup2, true);
+                    follower.followPath(grabPickup2, true);
                     setPathState(4);
                 }
                 break;
             case 4:
                 if (!follower.isBusy()) {
-                 //   follower.followPath(scorePickup2, true);
+                    follower.followPath(scorePickup2, true);
                     setPathState(5);
                 }
 
                 break;
             case 5:
                 if (!follower.isBusy()) {
-                 //   follower.followPath(grabPickup3, true);
+                    follower.followPath(grabPickup3, true);
                     setPathState(6);
                 }
                 break;
             case 6:
                 if (!follower.isBusy()) {
-                 //   follower.followPath(scorePickup3, true);
+                    follower.followPath(scorePickup3, true);
                     setPathState(7);
                 }
                 break;
             case 7:
                 if (!follower.isBusy()) {
-             //       setPathState(-1); // End state
+                    setPathState(-1); // End state
                 }
-                break;
-
-               */
+                break;*/
         }
     }
 
