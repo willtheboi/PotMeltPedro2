@@ -4,8 +4,8 @@ import android.os.SystemClock;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "PotMelt Auto (Runnable)", group = "Autonomous")
-public class PotMeltAutoRunnable extends PotMeltAuto {
+@Autonomous(name = "PotMelt Auto Far (Runnable)", group = "Autonomous")
+public class PotMeltAutoFarRunnable extends PotMeltAutoFar {
 
     @Override
     protected void autonomousPathUpdate() {
@@ -15,14 +15,14 @@ public class PotMeltAutoRunnable extends PotMeltAuto {
 
         // Example: Add logic here if you want to control arms, intake, etc.
 
-        switch (getPathState()) {
+        /*switch (getPathState()) {
             case 1:
-                launcherL.setPower(1.0);
+                //launcherL.setPower(1.0);
                 SystemClock.sleep(200);
             case 3:
                 launcherL.setPower(0);
                 break;
-        }
+        }*/
 
     }
 }

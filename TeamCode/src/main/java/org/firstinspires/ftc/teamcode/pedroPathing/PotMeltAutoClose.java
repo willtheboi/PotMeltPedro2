@@ -12,7 +12,7 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-public abstract class PotMeltAuto extends OpMode {
+public abstract class PotMeltAutoClose extends OpMode {
     DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
     DcMotor intake;
     CRServo outake1, outake2;
@@ -22,49 +22,67 @@ public abstract class PotMeltAuto extends OpMode {
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
     private int pathState;
-
-    private final Pose startPose = new Pose(63.3, 5.7, Math.toRadians(90));
-    private final Pose control = new Pose(43.9, 46.2);
-    private final Pose scorePose = new Pose(73.4, 76.5, Math.toRadians(230));
-    private final Pose pickup1Pose = new Pose(37, 121, Math.toRadians(0));
+    private final Pose startPose = new Pose(63.3, 5.7, Math.toRadians(270));
+    private final Pose control1 = new Pose(43.9, 46.2);
+    private final Pose launchPose = new Pose(68.7, 70.6, Math.toRadians(226));
+    private final Pose parkPose = new Pose(48.9, 49.4, Math.toRadians(226));
     private final Pose pickup2Pose = new Pose(43, 130, Math.toRadians(0));
     private final Pose pickup3Pose = new Pose(49, 135, Math.toRadians(0));
 
-    private Path scorePreload;
-    private PathChain grabPickup1, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
+    private Path launchPath1;
+    private PathChain parkPath, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
+
+    public void launch(float spool, float launch_duration, double power) {
+        long spool_long = (long) (spool*1000);
+        long launch_duration_long = (long) (launch_duration)*1000;
+        launcherL.setPower(power);
+        launcherR.setPower(-power);
+        SystemClock.sleep(spool_long);
+        feederL.setPower(-1);
+        outake1.setPower(1);
+        outake2.setPower(-1);
+        intake.setPower(1);
+        SystemClock.sleep(launch_duration_long);
+        launcherL.setPower(0);
+        launcherR.setPower(0);
+        feederL.setPower(0);
+        outake1.setPower(0);
+        outake2.setPower(0);
+        intake.setPower(0);
+    }
 
     public void buildPaths() {
-        scorePreload = new Path(new BezierCurve(startPose, control, scorePose));
-        scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
+        launchPath1 = new Path(new BezierCurve(startPose, control1, launchPose));
+        launchPath1.setLinearHeadingInterpolation(startPose.getHeading(), launchPose.getHeading());
 
-        grabPickup1 = follower.pathBuilder()
-                .addPath(new BezierLine(scorePose, pickup1Pose))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup1Pose.getHeading())
+        parkPath = follower.pathBuilder()
+                .addPath(new BezierLine(launchPose, parkPose))
+                .setLinearHeadingInterpolation(launchPose.getHeading(), parkPose.getHeading())
                 .build();
 
         scorePickup1 = follower.pathBuilder()
-                .addPath(new BezierLine(pickup1Pose, scorePose))
-                .setLinearHeadingInterpolation(pickup1Pose.getHeading(), scorePose.getHeading())
+                .addPath(new BezierLine(parkPose, launchPose))
+                .setLinearHeadingInterpolation(parkPose.getHeading(), launchPose.getHeading())
                 .build();
 
         grabPickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(scorePose, pickup2Pose))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup2Pose.getHeading())
+                .addPath(new BezierLine(launchPose, pickup2Pose))
+                .setLinearHeadingInterpolation(launchPose.getHeading(), pickup2Pose.getHeading())
                 .build();
 
         scorePickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(pickup2Pose, scorePose))
-                .setLinearHeadingInterpolation(pickup2Pose.getHeading(), scorePose.getHeading())
+                .addPath(new BezierLine(pickup2Pose, launchPose))
+                .setLinearHeadingInterpolation(pickup2Pose.getHeading(), launchPose.getHeading())
                 .build();
 
         grabPickup3 = follower.pathBuilder()
-                .addPath(new BezierLine(scorePose, pickup3Pose))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup3Pose.getHeading())
+                .addPath(new BezierLine(launchPose, pickup3Pose))
+                .setLinearHeadingInterpolation(launchPose.getHeading(), pickup3Pose.getHeading())
                 .build();
 
         scorePickup3 = follower.pathBuilder()
-                .addPath(new BezierLine(pickup3Pose, scorePose))
-                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), scorePose.getHeading())
+                .addPath(new BezierLine(pickup3Pose, launchPose))
+                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), launchPose.getHeading())
                 .build();
     }
 
@@ -96,34 +114,28 @@ public abstract class PotMeltAuto extends OpMode {
         follower.update();
         switch (pathState) {
             case 0:
-                follower.followPath(scorePreload);
-
+                launcherL.setPower(0);
+                launcherR.setPower(0);
+                feederL.setPower(0);
+                outake1.setPower(0);
+                outake2.setPower(0);
+                intake.setPower(0);
+                follower.followPath(launchPath1);
                 setPathState(1);
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    launcherL.setPower(1);
-                    launcherR.setPower(-1);
-                    SystemClock.sleep(2000);
-                    feederL.setPower(-1);
-                    outake1.setPower(1);
-                    outake2.setPower(-1);
-                    SystemClock.sleep(2000);
-                    launcherL.setPower(0);
-                    launcherR.setPower(0);
-                    feederL.setPower(0);
-                    outake1.setPower(0);
-                    outake2.setPower(0);
+                    launch(2, 5, 1);
+                    setPathState(2);
+                }
+                break;
+            case 2:
+                if (!follower.isBusy()) {
+                    follower.followPath(parkPath);
                     setPathState(-1);
                 }
                 break;
-            /*case 2:
-                if (!follower.isBusy()) {
-                    follower.followPath(scorePickup1, true);
-                    setPathState(3);
-                }
-                break;
-            case 3:
+            /*case 3:
                 if (!follower.isBusy()) {
                     follower.followPath(grabPickup2, true);
                     setPathState(4);
