@@ -1,11 +1,9 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
-import android.os.SystemClock;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "PotMelt Auto Close (Runnable)", group = "Autonomous")
-public class PotMeltAutoCloseRunnable extends PotMeltAutoClose {
+@Autonomous(name = "PotMelt Auto Far Red", group = "Autonomous")
+public class PotMeltAutoFarRRunnable extends PotMeltAutoFarR {
 
     @Override
     protected void autonomousPathUpdate() {
