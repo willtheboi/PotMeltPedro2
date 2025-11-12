@@ -25,8 +25,8 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
     private final Pose startPose = new Pose(15, 79.5, Math.toRadians(322));
     private final Pose control1 = new Pose(40.1, 53);
     private final Pose launchPose = new Pose(22.8, 70.6, Math.toRadians(316));
-    private final Pose intakePose = new Pose(35.2, 53.1, Math.toRadians(180));
-    private final Pose grabPose = new Pose(18.3, 53.1, Math.toRadians(180));
+    private final Pose intakePose = new Pose(35.2, 48.1, Math.toRadians(180));
+    private final Pose grabPose = new Pose(18.3, 48.1, Math.toRadians(180));
     private final Pose parkPose = new Pose(28.4, 82.2, Math.toRadians(180));
 
     private Path launchPath1;
