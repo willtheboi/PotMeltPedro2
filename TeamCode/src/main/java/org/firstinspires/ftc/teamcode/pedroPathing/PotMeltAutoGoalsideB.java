@@ -4,6 +4,7 @@ import android.os.SystemClock;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
@@ -22,14 +23,18 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
     private Timer pathTimer, opmodeTimer;
     private int pathState;
     private final Pose startPose = new Pose(15, 79.5, Math.toRadians(322));
-    private final Pose control1 = new Pose(43.9, 46.2);
+    private final Pose control1 = new Pose(40.1, 53);
     private final Pose launchPose = new Pose(22.8, 70.6, Math.toRadians(316));
-    private final Pose parkPose = new Pose(28.4, 82.2, Math.toRadians(316));
-    private final Pose pickup2Pose = new Pose(43, 130, Math.toRadians(0));
-    private final Pose pickup3Pose = new Pose(49, 135, Math.toRadians(0));
+    private final Pose intakePose = new Pose(35.2, 53.1, Math.toRadians(180));
+    private final Pose grabPose = new Pose(18.3, 53.1, Math.toRadians(180));
+    private final Pose parkPose = new Pose(28.4, 82.2, Math.toRadians(180));
 
     private Path launchPath1;
-    private PathChain parkPath, scorePickup1, grabPickup2, scorePickup2, grabPickup3, scorePickup3;
+    private PathChain intakePath1, grabPath1, launchPath2, parkPath, scorePickup2, grabPickup3, scorePickup3;
+
+    public void sleep(long time) {
+        SystemClock.sleep(time);
+    }
 
     public void launch(float spool, float launch_duration, double power) {
         long spool_long = (long) (spool*1000);
@@ -50,28 +55,61 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
         intake.setPower(0);
     }
 
+    public void suck() {
+        launcherL.setPower(-0.05);
+        launcherR.setPower(0.05);
+        //feederL.setPower(-0.4);
+        intake.setPower(1);
+    }
+
+    public void no_suck() {
+        launcherL.setPower(0);
+        launcherR.setPower(0);
+        feederL.setPower(0);
+        intake.setPower(0);
+    }
+
+    public void purge() {
+        feederL.setPower(-1);
+        outake1.setPower(1);
+        outake2.setPower(-1);
+        intake.setPower(-1);
+    }
+
+    public void stop_purge() {
+        feederL.setPower(0);
+        outake1.setPower(0);
+        outake2.setPower(0);
+        intake.setPower(0);
+    }
+
     public void buildPaths() {
         launchPath1 = new Path(new BezierLine(startPose, launchPose));
         launchPath1.setLinearHeadingInterpolation(startPose.getHeading(), launchPose.getHeading());
+
+        intakePath1 = follower.pathBuilder()
+                .addPath(new BezierCurve(launchPose, control1, intakePose))
+                .setLinearHeadingInterpolation(launchPose.getHeading(), intakePose.getHeading())
+                .build();
+
+        grabPath1 = follower.pathBuilder()
+                .addPath(new BezierLine(intakePose, grabPose))
+                .setLinearHeadingInterpolation(intakePose.getHeading(), grabPose.getHeading())
+                .build();
+
+        launchPath2 = follower.pathBuilder()
+                .addPath(new BezierLine(grabPose, launchPose))
+                .setLinearHeadingInterpolation(grabPose.getHeading(), launchPose.getHeading())
+                .build();
 
         parkPath = follower.pathBuilder()
                 .addPath(new BezierLine(launchPose, parkPose))
                 .setLinearHeadingInterpolation(launchPose.getHeading(), parkPose.getHeading())
                 .build();
 
-        scorePickup1 = follower.pathBuilder()
-                .addPath(new BezierLine(parkPose, launchPose))
-                .setLinearHeadingInterpolation(parkPose.getHeading(), launchPose.getHeading())
-                .build();
-
-        grabPickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(launchPose, pickup2Pose))
-                .setLinearHeadingInterpolation(launchPose.getHeading(), pickup2Pose.getHeading())
-                .build();
-
-        scorePickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(pickup2Pose, launchPose))
-                .setLinearHeadingInterpolation(pickup2Pose.getHeading(), launchPose.getHeading())
+        /*scorePickup2 = follower.pathBuilder()
+                .addPath(new BezierLine(grabPose, launchPose))
+                .setLinearHeadingInterpolation(grabPose.getHeading(), launchPose.getHeading())
                 .build();
 
         grabPickup3 = follower.pathBuilder()
@@ -82,7 +120,7 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
         scorePickup3 = follower.pathBuilder()
                 .addPath(new BezierLine(pickup3Pose, launchPose))
                 .setLinearHeadingInterpolation(pickup3Pose.getHeading(), launchPose.getHeading())
-                .build();
+                .build();*/
     }
 
     @Override
@@ -125,35 +163,41 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
             case 1:
                 if (!follower.isBusy()) {
                     launch(2, 5, 1);
+                    purge();
                     setPathState(2);
                 }
                 break;
             case 2:
                 if (!follower.isBusy()) {
-                    follower.followPath(parkPath);
-                    setPathState(-1);
+                    follower.followPath(intakePath1);
+                    setPathState(3);
                 }
                 break;
-            /*case 3:
+            case 3:
                 if (!follower.isBusy()) {
-                    follower.followPath(grabPickup2, true);
+                    stop_purge();
+                    suck();
+                    follower.followPath(grabPath1);
                     setPathState(4);
                 }
                 break;
             case 4:
                 if (!follower.isBusy()) {
-                    follower.followPath(scorePickup2, true);
+                    sleep(1000);
+                    no_suck();
+                    follower.followPath(launchPath2);
                     setPathState(5);
                 }
 
                 break;
             case 5:
                 if (!follower.isBusy()) {
-                    follower.followPath(grabPickup3, true);
-                    setPathState(6);
+                    launch(2, 5, 1);
+                    follower.followPath(parkPath);
+                    setPathState(-1);
                 }
                 break;
-            case 6:
+            /*case 6:
                 if (!follower.isBusy()) {
                     follower.followPath(scorePickup3, true);
                     setPathState(7);
