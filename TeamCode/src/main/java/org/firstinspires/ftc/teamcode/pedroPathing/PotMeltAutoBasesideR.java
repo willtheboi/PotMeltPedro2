@@ -12,7 +12,7 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-public abstract class PotMeltAutoCloseB extends OpMode {
+public abstract class PotMeltAutoBasesideR extends OpMode {
     DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
     DcMotor intake;
     CRServo outake1, outake2;
@@ -22,10 +22,10 @@ public abstract class PotMeltAutoCloseB extends OpMode {
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
     private int pathState;
-    private final Pose startPose = new Pose(26.2, 5.7, Math.toRadians(270));
-    private final Pose control1 = new Pose(42.8, 48.7);
-    private final Pose launchPose = new Pose(23.2, 70.6, Math.toRadians(314));
-    private final Pose parkPose = new Pose(39.4, 51.2, Math.toRadians(314));
+    private final Pose startPose = new Pose(63.3, 5.7, Math.toRadians(270));
+    private final Pose control1 = new Pose(43.9, 46.2);
+    private final Pose launchPose = new Pose(68.7, 70.6, Math.toRadians(226));
+    private final Pose parkPose = new Pose(48.9, 49.4, Math.toRadians(226));
     private final Pose pickup2Pose = new Pose(43, 130, Math.toRadians(0));
     private final Pose pickup3Pose = new Pose(49, 135, Math.toRadians(0));
 

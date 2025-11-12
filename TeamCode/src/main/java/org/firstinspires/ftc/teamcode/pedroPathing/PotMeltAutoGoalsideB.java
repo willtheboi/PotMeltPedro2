@@ -4,7 +4,6 @@ import android.os.SystemClock;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
@@ -12,7 +11,7 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-public abstract class PotMeltAutoCloseR extends OpMode {
+public abstract class PotMeltAutoGoalsideB extends OpMode {
     DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
     DcMotor intake;
     CRServo outake1, outake2;
@@ -22,10 +21,10 @@ public abstract class PotMeltAutoCloseR extends OpMode {
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
     private int pathState;
-    private final Pose startPose = new Pose(63.3, 5.7, Math.toRadians(270));
+    private final Pose startPose = new Pose(15, 79.5, Math.toRadians(322));
     private final Pose control1 = new Pose(43.9, 46.2);
-    private final Pose launchPose = new Pose(68.7, 70.6, Math.toRadians(226));
-    private final Pose parkPose = new Pose(48.9, 49.4, Math.toRadians(226));
+    private final Pose launchPose = new Pose(22.8, 70.6, Math.toRadians(316));
+    private final Pose parkPose = new Pose(28.4, 82.2, Math.toRadians(316));
     private final Pose pickup2Pose = new Pose(43, 130, Math.toRadians(0));
     private final Pose pickup3Pose = new Pose(49, 135, Math.toRadians(0));
 
@@ -52,7 +51,7 @@ public abstract class PotMeltAutoCloseR extends OpMode {
     }
 
     public void buildPaths() {
-        launchPath1 = new Path(new BezierCurve(startPose, control1, launchPose));
+        launchPath1 = new Path(new BezierLine(startPose, launchPose));
         launchPath1.setLinearHeadingInterpolation(startPose.getHeading(), launchPose.getHeading());
 
         parkPath = follower.pathBuilder()

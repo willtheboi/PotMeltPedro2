@@ -2,8 +2,8 @@ package org.firstinspires.ftc.teamcode.pedroPathing;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "PotMelt Auto Far Red", group = "Autonomous")
-public class PotMeltAutoFarRRunnable extends PotMeltAutoFarR {
+@Autonomous(name = "PotMelt Auto Goalside Red", group = "Autonomous")
+public class PotMeltAutoGoalsideRRunnable extends PotMeltAutoGoalsideR {
 
     @Override
     protected void autonomousPathUpdate() {

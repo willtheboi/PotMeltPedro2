@@ -11,7 +11,7 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-public abstract class PotMeltAutoFarB extends OpMode {
+public abstract class PotMeltAutoGoalsideR extends OpMode {
     DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
     DcMotor intake;
     CRServo outake1, outake2;
@@ -21,10 +21,10 @@ public abstract class PotMeltAutoFarB extends OpMode {
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
     private int pathState;
-    private final Pose startPose = new Pose(15, 79.5, Math.toRadians(322));
+    private final Pose startPose = new Pose(76.1, 79.1, Math.toRadians(226));
     private final Pose control1 = new Pose(43.9, 46.2);
-    private final Pose launchPose = new Pose(22.8, 70.6, Math.toRadians(316));
-    private final Pose parkPose = new Pose(28.4, 82.2, Math.toRadians(316));
+    private final Pose launchPose = new Pose(68.7, 70.6, Math.toRadians(226));
+    private final Pose parkPose = new Pose(65.8, 82.2, Math.toRadians(226));
     private final Pose pickup2Pose = new Pose(43, 130, Math.toRadians(0));
     private final Pose pickup3Pose = new Pose(49, 135, Math.toRadians(0));
 
