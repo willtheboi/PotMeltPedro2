@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.pedroPathing;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-@Autonomous(name = "PotMelt Auto Goalside Red", group = "Autonomous")
+@Autonomous(name = "PotMelt Auto Goalside Red Double", group = "Autonomous")
 public class PotMeltAutoGoalsideRRunnable extends PotMeltAutoGoalsideR {
 
     @Override
