@@ -229,7 +229,7 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
                 break;*/
         }
         LPID(target*2200, launcherL.getVelocity());
-        RPID(target*2200, launcherR.getVelocity());
+        RPID(target*-2200, launcherR.getVelocity());
     }
 
     public void LPID(double target, double current) {
