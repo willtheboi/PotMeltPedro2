@@ -168,14 +168,10 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
 
     @Override
     public void loop() {
-
-
-
         follower.update();
         switch (pathState) {
             case 0:
-                launcherL.setPower(0);
-                launcherR.setPower(0);
+                target = 0;
                 feederL.setPower(0);
                 outake1.setPower(0);
                 outake2.setPower(0);
@@ -242,11 +238,11 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
 
         double error = target-current;
         double derivative = (error - lastErrorL) / timerL.seconds();
-        double integralSumL = integral + (error);
+        integralSumL = integral + (error);
 
         double out = (Kp * error) + (Ki * integralSumL) + (Kd * derivative);
         launcherL.setPower(out);
-        double lastErrorL = error;
+        lastErrorL = error;
 
         timerL.reset();
     }
@@ -257,11 +253,11 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
 
         double error = target-current;
         double derivative = (error - lastErrorR) / timerL.seconds();
-        double integralSumR = integral + (error);
+        integralSumR = integral + (error);
 
         double out = (Kp * error) + (Ki * integralSumR) + (Kd * derivative);
         launcherR.setPower(out);
-        double lastErrorR = error;
+        lastErrorR = error;
 
         timerR.reset();
     }
