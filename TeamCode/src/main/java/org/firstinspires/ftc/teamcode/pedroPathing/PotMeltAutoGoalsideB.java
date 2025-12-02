@@ -168,6 +168,8 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
 
     @Override
     public void loop() {
+        LPID(target*2200, launcherL.getVelocity());
+        RPID(target*2200, launcherR.getVelocity());
         follower.update();
         switch (pathState) {
             case 0:
@@ -228,8 +230,7 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
                 }
                 break;*/
         }
-        LPID(target*2200, launcherL.getVelocity());
-        RPID(target*-2200, launcherR.getVelocity());
+
     }
 
     public void LPID(double target, double current) {
