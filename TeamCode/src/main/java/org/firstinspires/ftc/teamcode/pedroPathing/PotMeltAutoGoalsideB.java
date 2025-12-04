@@ -22,21 +22,6 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
     DcMotorEx launcherL, launcherR;
     CRServo feederL, feederR;
 
-    public static double target = 0;
-
-    public static double integralSumL = 0;
-    public static double lastErrorL = 0;
-
-    public static double integralSumR = 0;
-    public static double lastErrorR = 0;
-
-    public static ElapsedTime timerL = new ElapsedTime();
-    public static ElapsedTime timerR = new ElapsedTime();
-
-    public static double Kp = 0.07;
-    public static double Ki = 0.02;
-    public static double Kd = 0.01;
-
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
     private int pathState;
@@ -57,14 +42,16 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
     public void launch(float spool, float launch_duration, double power) {
         long spool_long = (long) (spool*1000);
         long launch_duration_long = (long) (launch_duration)*1000;
-        target = power;
+        launcherL.setVelocity(power);
+        launcherR.setVelocity(-power);
         SystemClock.sleep(spool_long);
         feederL.setPower(-1);
         outake1.setPower(1);
         outake2.setPower(-1);
         intake.setPower(1);
         SystemClock.sleep(launch_duration_long);
-        target = 0;
+        launcherL.setVelocity(0);
+        launcherR.setVelocity(0);
         feederL.setPower(0);
         outake1.setPower(0);
         outake2.setPower(0);
@@ -72,13 +59,15 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
     }
 
     public void suck() {
-        target = 0.05;
+        launcherL.setVelocity(-100);
+        launcherR.setVelocity(100);
         //feederL.setPower(-0.4);
         intake.setPower(1);
     }
 
     public void no_suck() {
-        target = 0;
+        launcherL.setVelocity(0);
+        launcherR.setVelocity(0);
         feederL.setPower(0);
         intake.setPower(0);
     }
@@ -168,12 +157,11 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
 
     @Override
     public void loop() {
-        LPID(target*2200, launcherL.getVelocity());
-        RPID(target*2200, launcherR.getVelocity());
         follower.update();
         switch (pathState) {
             case 0:
-                target = 0;
+                launcherL.setVelocity(0);
+                launcherR.setVelocity(0);
                 feederL.setPower(0);
                 outake1.setPower(0);
                 outake2.setPower(0);
@@ -183,7 +171,7 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    launch(2, 5, 1);
+                    launch(2, 5, 2400);
                     purge();
                     setPathState(2);
                 }
@@ -213,7 +201,7 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
                 break;
             case 5:
                 if (!follower.isBusy()) {
-                    launch(2, 5, 1);
+                    launch(2, 5, 2400);
                     follower.followPath(parkPath);
                     setPathState(-1);
                 }
@@ -233,35 +221,6 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
 
     }
 
-    public void LPID(double target, double current) {
-
-        double integral = integralSumL;
-
-        double error = target-current;
-        double derivative = (error - lastErrorL) / timerL.seconds();
-        integralSumL = integral + (error);
-
-        double out = (Kp * error) + (Ki * integralSumL) + (Kd * derivative);
-        launcherL.setPower(out);
-        lastErrorL = error;
-
-        timerL.reset();
-    }
-
-    public void RPID(double target, double current) {
-
-        double integral = integralSumR;
-
-        double error = target-current;
-        double derivative = (error - lastErrorR) / timerL.seconds();
-        integralSumR = integral + (error);
-
-        double out = (Kp * error) + (Ki * integralSumR) + (Kd * derivative);
-        launcherR.setPower(out);
-        lastErrorR = error;
-
-        timerR.reset();
-    }
 
     public void setPathState(int pState) {
         pathState = pState;

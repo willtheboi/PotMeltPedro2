@@ -12,11 +12,12 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 public abstract class PotMeltAutoGoalsideR extends OpMode {
     DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
     DcMotor intake;
     CRServo outake1, outake2;
-    DcMotor launcherL, launcherR;
+    DcMotorEx launcherL, launcherR;
     CRServo feederL, feederR;
 
     private Follower follower;
@@ -39,8 +40,8 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
     public void launch(float spool, float launch_duration, double power) {
         long spool_long = (long) (spool*1000);
         long launch_duration_long = (long) (launch_duration)*1000;
-        launcherL.setPower(power);
-        launcherR.setPower(-power);
+        launcherL.setVelocity(power);
+        launcherR.setVelocity(-power);
         SystemClock.sleep(spool_long);
         feederL.setPower(-1);
         outake1.setPower(1);
@@ -56,15 +57,15 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
     }
 
     public void suck() {
-        launcherL.setPower(-0.05);
-        launcherR.setPower(0.05);
+        launcherL.setVelocity(-100);
+        launcherR.setVelocity(100);
         //feederL.setPower(-0.4);
         intake.setPower(1);
     }
 
     public void no_suck() {
-        launcherL.setPower(0);
-        launcherR.setPower(0);
+        launcherL.setVelocity(0);
+        launcherR.setVelocity(0);
         feederL.setPower(0);
         intake.setPower(0);
     }
@@ -128,8 +129,8 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
         intake = hardwareMap.get(DcMotor.class, "intake");
         outake1 = hardwareMap.get(CRServo.class, "outake1");
         outake2 = hardwareMap.get(CRServo.class, "outake2");
-        launcherL = hardwareMap.get(DcMotor.class, "launcherL");
-        launcherR = hardwareMap.get(DcMotor.class, "launcherR");
+        launcherL = hardwareMap.get(DcMotorEx.class, "launcherL");
+        launcherR = hardwareMap.get(DcMotorEx.class, "launcherR");
         feederL = hardwareMap.get(CRServo.class, "feeder1");
         feederR = hardwareMap.get(CRServo.class, "feeder2");
         pathTimer = new Timer();
@@ -162,7 +163,7 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    launch(2, 5, 1);
+                    launch(2, 5, 2400);
                     purge();
                     setPathState(2);
                 }
@@ -192,7 +193,7 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
                 break;
             case 5:
                 if (!follower.isBusy()) {
-                    launch(2, 5, 1);
+                    launch(2, 5, 2400);
                     follower.followPath(parkPath);
                     setPathState(-1);
                 }
