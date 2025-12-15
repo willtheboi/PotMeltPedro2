@@ -163,7 +163,7 @@ public abstract class PotMeltAutoGoalsideRSingle extends OpMode {
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    launch(2, 5, 2400);
+                    launch(2, 5, 2300);
                     //purge();
                     setPathState(2);
                 }
