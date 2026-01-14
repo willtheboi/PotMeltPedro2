@@ -16,9 +16,10 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 public abstract class PotMeltAutoGoalsideR extends OpMode {
     DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
     DcMotor intake;
+    DcMotor transfer_motor;
     CRServo outake1, outake2;
-    DcMotorEx launcherL, launcherR;
-    CRServo feederL, feederR;
+    DcMotorEx launcher;
+    CRServo transfer_servo;
 
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
@@ -40,45 +41,42 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
     public void launch(float spool, float launch_duration, double power) {
         long spool_long = (long) (spool*1000);
         long launch_duration_long = (long) (launch_duration)*1000;
-        launcherL.setVelocity(power);
-        launcherR.setVelocity(-power);
+        launcher.setVelocity(power);
         SystemClock.sleep(spool_long);
-        feederL.setPower(-1);
+        transfer_servo.setPower(-1);
         outake1.setPower(1);
         outake2.setPower(-1);
         intake.setPower(1);
         SystemClock.sleep(launch_duration_long);
-        launcherL.setPower(0);
-        launcherR.setPower(0);
-        feederL.setPower(0);
+        launcher.setPower(0);
+        transfer_servo.setPower(0);
         outake1.setPower(0);
         outake2.setPower(0);
         intake.setPower(0);
     }
 
     public void suck() {
-        launcherL.setVelocity(-100);
-        launcherR.setVelocity(100);
-        //feederL.setPower(-0.4);
+        launcher.setVelocity(100);
+        //transfer_servo.setPower(-0.4);
         intake.setPower(1);
     }
 
     public void no_suck() {
-        launcherL.setVelocity(0);
-        launcherR.setVelocity(0);
-        feederL.setPower(0);
+        launcher.setVelocity(0);
+        transfer_servo.setPower(0);
+        transfer_motor.setPower(0);
         intake.setPower(0);
     }
 
     public void purge() {
-        feederL.setPower(-1);
+        transfer_servo.setPower(-1);
         outake1.setPower(1);
         outake2.setPower(-1);
         intake.setPower(-1);
     }
 
     public void stop_purge() {
-        feederL.setPower(0);
+        transfer_servo.setPower(0);
         outake1.setPower(0);
         outake2.setPower(0);
         intake.setPower(0);
@@ -127,12 +125,9 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
     @Override
     public void init() {
         intake = hardwareMap.get(DcMotor.class, "intake");
-        outake1 = hardwareMap.get(CRServo.class, "outake1");
-        outake2 = hardwareMap.get(CRServo.class, "outake2");
-        launcherL = hardwareMap.get(DcMotorEx.class, "launcherL");
-        launcherR = hardwareMap.get(DcMotorEx.class, "launcherR");
-        feederL = hardwareMap.get(CRServo.class, "feeder1");
-        feederR = hardwareMap.get(CRServo.class, "feeder2");
+        launcher = hardwareMap.get(DcMotorEx.class, "launcher");
+        transfer_servo = hardwareMap.get(CRServo.class, "feeder1");
+        transfer_motor = hardwareMap.get(DcMotor.class, "feeder2");
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
@@ -152,9 +147,8 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
         follower.update();
         switch (pathState) {
             case 0:
-                launcherL.setPower(0);
-                launcherR.setPower(0);
-                feederL.setPower(0);
+                launcher.setPower(0);
+                transfer_servo.setPower(0);
                 outake1.setPower(0);
                 outake2.setPower(0);
                 intake.setPower(0);

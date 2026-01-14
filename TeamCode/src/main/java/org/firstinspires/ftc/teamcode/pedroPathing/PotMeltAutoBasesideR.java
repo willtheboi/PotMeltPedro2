@@ -26,7 +26,7 @@ public abstract class PotMeltAutoBasesideR extends OpMode {
     private final Pose control1 = new Pose(43.9, 46.2);
     private final Pose launchPose = new Pose(68.7, 70.6, Math.toRadians(226));
     private final Pose parkPose = new Pose(48.9, 49.4, Math.toRadians(226));
-    private final Pose pickup2Pose = new Pose(43, 130, Math.toRadians(0));
+    private final Pose pickup2Pose = new Pose(22.66, 53.2, Math.toRadians(0));
     private final Pose pickup3Pose = new Pose(49, 135, Math.toRadians(0));
 
     private Path launchPath1;
@@ -132,15 +132,18 @@ public abstract class PotMeltAutoBasesideR extends OpMode {
             case 2:
                 if (!follower.isBusy()) {
                     follower.followPath(parkPath);
+                    setPathState(3);
+                }
+                break;
+            case 3:
+                if (!follower.isBusy()) {
+                    intake.setPower(1);
+                    follower.followPath(grabPickup2, true);
+                    SystemClock.sleep(8000);
                     setPathState(-1);
                 }
                 break;
-            /*case 3:
-                if (!follower.isBusy()) {
-                    follower.followPath(grabPickup2, true);
-                    setPathState(4);
-                }
-                break;
+                /*
             case 4:
                 if (!follower.isBusy()) {
                     follower.followPath(scorePickup2, true);
@@ -156,7 +159,7 @@ public abstract class PotMeltAutoBasesideR extends OpMode {
                 break;
             case 6:
                 if (!follower.isBusy()) {
-                    follower.followPath(scorePickup3, true);
+                    follower.followPath(scorePickup3, true);  \
                     setPathState(7);
                 }
                 break;
