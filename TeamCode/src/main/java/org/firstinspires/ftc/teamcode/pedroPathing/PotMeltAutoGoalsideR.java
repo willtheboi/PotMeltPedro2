@@ -13,23 +13,25 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
+
 public abstract class PotMeltAutoGoalsideR extends OpMode {
     DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
     DcMotor intake;
     DcMotor transfer_motor;
-    CRServo outake1, outake2;
+    CRServo servo_front;
     DcMotorEx launcher;
-    CRServo transfer_servo;
+    Servo flipper;
 
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
     private int pathState;
-    private final Pose startPose = new Pose(76.1, 79.1, Math.toRadians(218));
+    private final Pose startPose = new Pose(73.7, 79.8, Math.toRadians(38));
     private final Pose control1 = new Pose(51.4, 53);
-    private final Pose launchPose = new Pose(68.7, 70.6, Math.toRadians(226));
+    private final Pose launchPose = new Pose(46.1, 43.7, Math.toRadians(47));
     private final Pose intakePose = new Pose(57.1, 53.1, Math.toRadians(0));
     private final Pose grabPose = new Pose(74, 53.1, Math.toRadians(0));
-    private final Pose parkPose = new Pose(58.8, 81.2, Math.toRadians(226));
+    private final Pose parkPose = new Pose(60.3, 74.8, Math.toRadians(47));
 
     private Path launchPath1;
     private PathChain intakePath1, grabPath1, launchPath2, parkPath, scorePickup2, grabPickup3, scorePickup3;
@@ -43,15 +45,9 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
         long launch_duration_long = (long) (launch_duration)*1000;
         launcher.setVelocity(power);
         SystemClock.sleep(spool_long);
-        transfer_servo.setPower(-1);
-        outake1.setPower(1);
-        outake2.setPower(-1);
         intake.setPower(1);
         SystemClock.sleep(launch_duration_long);
         launcher.setPower(0);
-        transfer_servo.setPower(0);
-        outake1.setPower(0);
-        outake2.setPower(0);
         intake.setPower(0);
     }
 
@@ -63,22 +59,15 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
 
     public void no_suck() {
         launcher.setVelocity(0);
-        transfer_servo.setPower(0);
         transfer_motor.setPower(0);
         intake.setPower(0);
     }
 
     public void purge() {
-        transfer_servo.setPower(-1);
-        outake1.setPower(1);
-        outake2.setPower(-1);
         intake.setPower(-1);
     }
 
     public void stop_purge() {
-        transfer_servo.setPower(0);
-        outake1.setPower(0);
-        outake2.setPower(0);
         intake.setPower(0);
     }
 
@@ -126,8 +115,7 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
     public void init() {
         intake = hardwareMap.get(DcMotor.class, "intake");
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
-        transfer_servo = hardwareMap.get(CRServo.class, "feeder1");
-        transfer_motor = hardwareMap.get(DcMotor.class, "feeder2");
+        transfer_motor = hardwareMap.get(DcMotor.class, "transfer_motor");
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
@@ -148,17 +136,14 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
         switch (pathState) {
             case 0:
                 launcher.setPower(0);
-                transfer_servo.setPower(0);
-                outake1.setPower(0);
-                outake2.setPower(0);
                 intake.setPower(0);
                 follower.followPath(launchPath1);
                 setPathState(1);
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    launch(2, 5, 2300);
-                    purge();
+                    //launch(2, 5, 2300);
+                    //purge();
                     setPathState(2);
                 }
                 break;
@@ -170,8 +155,8 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
                 break;
             case 3:
                 if (!follower.isBusy()) {
-                    stop_purge();
-                    suck();
+                    //stop_purge();
+                    //suck();
                     follower.followPath(grabPath1);
                     setPathState(4);
                 }
@@ -179,7 +164,7 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
             case 4:
                 if (!follower.isBusy()) {
                     sleep(1000);
-                    no_suck();
+                    //no_suck();
                     follower.followPath(launchPath2);
                     setPathState(5);
                 }
@@ -187,7 +172,7 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
                 break;
             case 5:
                 if (!follower.isBusy()) {
-                    launch(2, 5, 2300);
+                    //launch(2, 5, 2300);
                     follower.followPath(parkPath);
                     setPathState(-1);
                 }

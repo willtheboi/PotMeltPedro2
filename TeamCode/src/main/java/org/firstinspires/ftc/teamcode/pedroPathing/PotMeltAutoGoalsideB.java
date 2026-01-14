@@ -13,25 +13,26 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 //test
 public abstract class PotMeltAutoGoalsideB extends OpMode {
     DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
     DcMotor intake;
-    CRServo outake1, outake2;
-    DcMotorEx launcherL, launcherR;
-    CRServo feederL, feederR;
+    CRServo servo_front;
+    DcMotorEx launcher;
+    Servo flipper;
 
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
     private int pathState;
-    private final Pose startPose = new Pose(15, 79.5, Math.toRadians(322));
+    private final Pose startPose = new Pose(15.5, 79.7, Math.toRadians(143));
     private final Pose control1 = new Pose(40.1, 53);
-    private final Pose launchPose = new Pose(22.8, 70.6, Math.toRadians(316));
+    private final Pose launchPose = new Pose(44.4, 42.8, Math.toRadians(133));
     private final Pose intakePose = new Pose(35.2, 48.1, Math.toRadians(180));
     private final Pose grabPose = new Pose(18, 48.1, Math.toRadians(180));
-    private final Pose parkPose = new Pose(30.4, 81.2, Math.toRadians(316));
+    private final Pose parkPose = new Pose(29.7, 76.4, Math.toRadians(133));
 
     private Path launchPath1;
     private PathChain intakePath1, grabPath1, launchPath2, parkPath, scorePickup2, grabPickup3, scorePickup3;
@@ -43,47 +44,30 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
     public void launch(float spool, float launch_duration, double power) {
         long spool_long = (long) (spool*1000);
         long launch_duration_long = (long) (launch_duration)*1000;
-        launcherL.setVelocity(power);
-        launcherR.setVelocity(-power);
+        launcher.setVelocity(power);
         SystemClock.sleep(spool_long);
-        feederL.setPower(-1);
-        outake1.setPower(1);
-        outake2.setPower(-1);
         intake.setPower(1);
         SystemClock.sleep(launch_duration_long);
-        launcherL.setVelocity(0);
-        launcherR.setVelocity(0);
-        feederL.setPower(0);
-        outake1.setPower(0);
-        outake2.setPower(0);
+        launcher.setVelocity(0);
         intake.setPower(0);
     }
 
     public void suck() {
-        launcherL.setVelocity(-100);
-        launcherR.setVelocity(100);
+        launcher.setVelocity(-100);
         //feederL.setPower(-0.4);
         intake.setPower(1);
     }
 
     public void no_suck() {
-        launcherL.setVelocity(0);
-        launcherR.setVelocity(0);
-        feederL.setPower(0);
+        launcher.setVelocity(0);
         intake.setPower(0);
     }
 
     public void purge() {
-        feederL.setPower(-1);
-        outake1.setPower(1);
-        outake2.setPower(-1);
         intake.setPower(-1);
     }
 
     public void stop_purge() {
-        feederL.setPower(0);
-        outake1.setPower(0);
-        outake2.setPower(0);
         intake.setPower(0);
     }
 
@@ -130,17 +114,10 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
     @Override
     public void init() {
         intake = hardwareMap.get(DcMotor.class, "intake");
-        outake1 = hardwareMap.get(CRServo.class, "outake1");
-        outake2 = hardwareMap.get(CRServo.class, "outake2");
-        launcherL = hardwareMap.get(DcMotorEx.class, "launcherL");
-        launcherR = hardwareMap.get(DcMotorEx.class, "launcherR");
-        feederL = hardwareMap.get(CRServo.class, "feeder1");
-        feederR = hardwareMap.get(CRServo.class, "feeder2");
+        launcher = hardwareMap.get(DcMotorEx.class, "launcher");
 
-        launcherL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        launcherR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        launcherL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        launcherR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcher.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         pathTimer = new Timer();
         opmodeTimer = new Timer();
@@ -161,19 +138,15 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
         follower.update();
         switch (pathState) {
             case 0:
-                launcherL.setVelocity(0);
-                launcherR.setVelocity(0);
-                feederL.setPower(0);
-                outake1.setPower(0);
-                outake2.setPower(0);
+                launcher.setVelocity(0);
                 intake.setPower(0);
                 follower.followPath(launchPath1);
                 setPathState(1);
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    launch(2, 5, 2300);
-                    purge();
+                    //launch(2, 5, 2300);
+                    //purge();
                     setPathState(2);
                 }
                 break;
@@ -185,8 +158,8 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
                 break;
             case 3:
                 if (!follower.isBusy()) {
-                    stop_purge();
-                    suck();
+                    //stop_purge();
+                    //suck();
                     follower.followPath(grabPath1);
                     setPathState(4);
                 }
@@ -194,7 +167,7 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
             case 4:
                 if (!follower.isBusy()) {
                     sleep(1000);
-                    no_suck();
+                    //no_suck();
                     follower.followPath(launchPath2);
                     setPathState(5);
                 }
@@ -202,7 +175,7 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
                 break;
             case 5:
                 if (!follower.isBusy()) {
-                    launch(2, 5, 2300);
+                    //launch(2, 5, 2300);
                     follower.followPath(parkPath);
                     setPathState(-1);
                 }
