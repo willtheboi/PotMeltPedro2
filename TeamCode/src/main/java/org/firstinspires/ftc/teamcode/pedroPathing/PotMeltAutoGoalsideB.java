@@ -196,6 +196,7 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
                     launch(2, 1500);
                     purge();
                     follower.followPath(parkPath);
+                    flipper.setPosition(0);
                     setPathState(-1);
                 }
                 break;

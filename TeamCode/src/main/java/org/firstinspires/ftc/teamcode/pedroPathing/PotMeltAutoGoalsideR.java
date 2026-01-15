@@ -34,7 +34,7 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
     private final Pose parkPose = new Pose(60.3, 74.8, Math.toRadians(47));
 
     private Path launchPath1;
-    private PathChain intakePath1, grabPath1, launchPath2, parkPath, scorePickup2, grabPickup3, scorePickup3;
+    private PathChain  parkPath, intakePath1, grabPath1, launchPath2, scorePickup2, grabPickup3, scorePickup3;
 
     public void sleep(long time) {
         SystemClock.sleep(time);
@@ -195,6 +195,8 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
                     launch(2, 1500);
                     purge();
                     follower.followPath(parkPath);
+                    stop_purge();
+                    flipper.setPosition(0);
                     setPathState(-1);
                 }
                 break;

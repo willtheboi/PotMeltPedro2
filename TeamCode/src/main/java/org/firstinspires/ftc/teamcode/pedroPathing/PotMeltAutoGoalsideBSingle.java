@@ -18,6 +18,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public abstract class PotMeltAutoGoalsideBSingle extends OpMode {
     DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
     DcMotor intake;
+    DcMotor transfer_motor;
     CRServo servo_front;
     DcMotorEx launcher;
     Servo flipper;
@@ -39,33 +40,45 @@ public abstract class PotMeltAutoGoalsideBSingle extends OpMode {
         SystemClock.sleep(time);
     }
 
-    public void launch(float spool, float launch_duration, double power) {
+    public void launch(float spool, double power) {
         long spool_long = (long) (spool*1000);
-        long launch_duration_long = (long) (launch_duration)*1000;
         launcher.setVelocity(power);
         SystemClock.sleep(spool_long);
         intake.setPower(1);
-        SystemClock.sleep(launch_duration_long);
+        transfer_motor.setPower(-1);
+        servo_front.setPower(-1);
+        SystemClock.sleep(3000);
+        intake.setPower(-1);
+        transfer_motor.setPower(1);
+        servo_front.setPower(1);
+        launcher.setVelocity(power+30);
+        flipper.setPosition(1);
+        SystemClock.sleep(2000);
+        launcher.setVelocity(0);
         intake.setPower(0);
+        transfer_motor.setPower(0);
+        servo_front.setPower(0);
     }
 
     public void suck() {
-        launcher.setVelocity(-100);
-        //feederL.setPower(-0.4);
         intake.setPower(1);
     }
 
     public void no_suck() {
-        launcher.setVelocity(0);
         intake.setPower(0);
     }
 
     public void purge() {
         intake.setPower(-1);
+        transfer_motor.setPower(1);
+        servo_front.setPower(1);
+        flipper.setPosition(0);
     }
 
     public void stop_purge() {
         intake.setPower(0);
+        transfer_motor.setPower(0);
+        servo_front.setPower(0);
     }
 
     public void buildPaths() {
@@ -138,14 +151,16 @@ public abstract class PotMeltAutoGoalsideBSingle extends OpMode {
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    //launch(2, 5, 2300);
-                    //purge();
+                    launch(2, 1500);
+                    purge();
                     setPathState(2);
                 }
                 break;
             case 2:
                 if (!follower.isBusy()) {
                     follower.followPath(parkPath);
+                    stop_purge();
+                    flipper.setPosition(0);
                     setPathState(-1);
                 }
                 break;

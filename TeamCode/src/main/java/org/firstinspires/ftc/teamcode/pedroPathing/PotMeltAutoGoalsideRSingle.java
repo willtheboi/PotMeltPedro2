@@ -170,6 +170,7 @@ public abstract class PotMeltAutoGoalsideRSingle extends OpMode {
                 if (!follower.isBusy()) {
                     follower.followPath(parkPath);
                     stop_purge();
+                    flipper.setPosition(0);
                     setPathState(-1);
 
                 }

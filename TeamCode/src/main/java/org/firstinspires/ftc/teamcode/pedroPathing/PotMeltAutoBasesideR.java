@@ -166,6 +166,7 @@ public abstract class PotMeltAutoBasesideR extends OpMode {
                 if (!follower.isBusy()) {
                     launch(2, 1600);
                     follower.followPath(parkPath);
+                    flipper.setPosition(0);
                     setPathState(-1);
                 }
 
