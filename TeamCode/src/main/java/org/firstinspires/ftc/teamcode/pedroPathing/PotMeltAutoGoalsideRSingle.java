@@ -47,9 +47,10 @@ public abstract class PotMeltAutoGoalsideRSingle extends OpMode {
         transfer_motor.setPower(-1);
         servo_front.setPower(-1);
         SystemClock.sleep(3000);
-        intake.setPower(-0.7);
-        transfer_motor.setPower(0.7);
-        servo_front.setPower(0.7);
+        intake.setPower(-1);
+        transfer_motor.setPower(1);
+        servo_front.setPower(1);
+        launcher.setVelocity(power+30);
         flipper.setPosition(1);
         SystemClock.sleep(1000);
         launcher.setVelocity(0);

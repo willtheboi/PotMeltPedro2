@@ -28,9 +28,9 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
     private int pathState;
     private final Pose startPose = new Pose(73.7, 79.8, Math.toRadians(38));
     private final Pose control1 = new Pose(51.4, 53);
-    private final Pose launchPose = new Pose(51.5, 46.1, Math.toRadians(48));
+    private final Pose launchPose = new Pose(52.5, 46.1, Math.toRadians(48));
     private final Pose intakePose = new Pose(57.1, 53.1, Math.toRadians(0));
-    private final Pose grabPose = new Pose(74, 53.1, Math.toRadians(0));
+    private final Pose grabPose = new Pose(80, 53.1, Math.toRadians(0));
     private final Pose parkPose = new Pose(60.3, 74.8, Math.toRadians(47));
 
     private Path launchPath1;
@@ -48,11 +48,12 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
         transfer_motor.setPower(-1);
         servo_front.setPower(-1);
         SystemClock.sleep(3000);
-        intake.setPower(-0.7);
-        transfer_motor.setPower(0.7);
-        servo_front.setPower(0.7);
+        intake.setPower(-1);
+        transfer_motor.setPower(1);
+        servo_front.setPower(1);
+        launcher.setVelocity(power+30);
         flipper.setPosition(1);
-        SystemClock.sleep(1000);
+        SystemClock.sleep(2000);
         launcher.setVelocity(0);
         intake.setPower(0);
         transfer_motor.setPower(0);
@@ -60,14 +61,10 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
     }
 
     public void suck() {
-        transfer_motor.setPower(-1);
-        servo_front.setPower(-1);
         intake.setPower(1);
     }
 
     public void no_suck() {
-        transfer_motor.setPower(0);
-        servo_front.setPower(0);
         intake.setPower(0);
     }
 
@@ -137,6 +134,11 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
         follower = Constants.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
+
+        launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        transfer_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
     }
 
     @Override
@@ -191,6 +193,7 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
             case 5:
                 if (!follower.isBusy()) {
                     launch(2, 1500);
+                    purge();
                     follower.followPath(parkPath);
                     setPathState(-1);
                 }
