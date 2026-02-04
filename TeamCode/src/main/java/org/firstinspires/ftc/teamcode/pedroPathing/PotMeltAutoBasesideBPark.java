@@ -4,7 +4,6 @@ import android.os.SystemClock;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
@@ -14,10 +13,8 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
-//test
-public abstract class PotMeltAutoGoalsideB extends OpMode {
+public abstract class PotMeltAutoBasesideBPark extends OpMode {
     DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
     DcMotor intake;
     DcMotor transfer_motor;
@@ -28,19 +25,15 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
     private int pathState;
-    private final Pose startPose = new Pose(15.5, 78.9, Math.toRadians(144));
-    private final Pose control1 = new Pose(40.1, 53);
-    private final Pose launchPose = new Pose(37.7, 47.5, Math.toRadians(136));
-    private final Pose intakePose = new Pose(35.2, 52.1, Math.toRadians(180));
-    private final Pose grabPose = new Pose(12, 51.1, Math.toRadians(180));
-    private final Pose parkPose = new Pose(29.7, 76.4, Math.toRadians(270));
+    private final Pose startPose = new Pose(35.3, 5.7, Math.toRadians(90));
+    private final Pose control1 = new Pose(42.8, 48.7);
+    private final Pose launchPose = new Pose(37.4, 14.9, Math.toRadians(114));
+    private final Pose parkPose = new Pose(24.1, 11.6, Math.toRadians(180));
+    private final Pose intakePose1 = new Pose(28.4,26 , Math.toRadians(180));
+    private final Pose grabPose1 = new Pose(6, 26, Math.toRadians(180));
 
     private Path launchPath1;
-    private PathChain intakePath1, grabPath1, launchPath2, parkPath, scorePickup2, grabPickup3, scorePickup3;
-
-    public void sleep(long time) {
-        SystemClock.sleep(time);
-    }
+    private PathChain parkPath, grabPath1, intakePath1, launchPath2, parkPath2;
 
     public void launch(float spool, double power) {
         long spool_long = (long) (spool*1000);
@@ -56,6 +49,7 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
         launcher.setVelocity(power+30);
         flipper.setPosition(1);
         SystemClock.sleep(2000);
+        flipper.setPosition(0);
         launcher.setVelocity(0);
         intake.setPower(0);
         transfer_motor.setPower(0);
@@ -88,18 +82,13 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
         launchPath1.setLinearHeadingInterpolation(startPose.getHeading(), launchPose.getHeading());
 
         intakePath1 = follower.pathBuilder()
-                .addPath(new BezierCurve(launchPose, control1, intakePose))
-                .setLinearHeadingInterpolation(launchPose.getHeading(), intakePose.getHeading())
+                .addPath(new BezierLine(launchPose, intakePose1))
+                .setLinearHeadingInterpolation(launchPose.getHeading(), intakePose1.getHeading())
                 .build();
 
         grabPath1 = follower.pathBuilder()
-                .addPath(new BezierLine(intakePose, grabPose))
-                .setLinearHeadingInterpolation(intakePose.getHeading(), grabPose.getHeading())
-                .build();
-
-        launchPath2 = follower.pathBuilder()
-                .addPath(new BezierLine(grabPose, launchPose))
-                .setLinearHeadingInterpolation(grabPose.getHeading(), launchPose.getHeading())
+                .addPath(new BezierLine(intakePose1, grabPose1))
+                .setLinearHeadingInterpolation(intakePose1.getHeading(), grabPose1.getHeading())
                 .build();
 
         parkPath = follower.pathBuilder()
@@ -107,20 +96,14 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
                 .setLinearHeadingInterpolation(launchPose.getHeading(), parkPose.getHeading())
                 .build();
 
-        /*scorePickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(grabPose, launchPose))
-                .setLinearHeadingInterpolation(grabPose.getHeading(), launchPose.getHeading())
+        launchPath2 = follower.pathBuilder()
+                .addPath(new BezierLine(grabPose1, launchPose))
+                .setLinearHeadingInterpolation(grabPose1.getHeading(), launchPose.getHeading())
                 .build();
-
-        grabPickup3 = follower.pathBuilder()
-                .addPath(new BezierLine(launchPose, pickup3Pose))
-                .setLinearHeadingInterpolation(launchPose.getHeading(), pickup3Pose.getHeading())
+        parkPath2 = follower.pathBuilder()
+                .addPath(new BezierLine(startPose, parkPose))
+                .setLinearHeadingInterpolation(startPose.getHeading(), parkPose.getHeading())
                 .build();
-
-        scorePickup3 = follower.pathBuilder()
-                .addPath(new BezierLine(pickup3Pose, launchPose))
-                .setLinearHeadingInterpolation(pickup3Pose.getHeading(), launchPose.getHeading())
-                .build();*/
     }
 
     @Override
@@ -130,10 +113,6 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
         transfer_motor = hardwareMap.get(DcMotor.class, "transfer_motor");
         servo_front = hardwareMap.get(CRServo.class, "servo_front");
         flipper = hardwareMap.get(Servo.class, "flipper");
-
-        launcher.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
@@ -158,63 +137,45 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
                 transfer_motor.setPower(0);
                 servo_front.setPower(0);
                 flipper.setPosition(0);
-                follower.followPath(launchPath1);
-                setPathState(1);
+                intake.setPower(0);
+                follower.followPath(parkPath2);
+                setPathState(-1);
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    launch(2, 1425);
+                    launch(2, 1600);
                     purge();
+                    follower.followPath(intakePath1);
                     setPathState(2);
                 }
                 break;
             case 2:
                 if (!follower.isBusy()) {
-                    follower.followPath(intakePath1);
+                    stop_purge();
+                    suck();
+                    follower.followPath(grabPath1);
                     setPathState(3);
                 }
                 break;
             case 3:
                 if (!follower.isBusy()) {
-                    stop_purge();
-                    suck();
-                    follower.followPath(grabPath1);
+                    no_suck();
+                    follower.followPath(launchPath2);
                     setPathState(4);
                 }
                 break;
+
             case 4:
                 if (!follower.isBusy()) {
-                    sleep(1000);
-                    no_suck();
-                    follower.followPath(launchPath2);
-                    setPathState(5);
-                }
-
-                break;
-            case 5:
-                if (!follower.isBusy()) {
-                    launch(2, 1425);
-                    purge();
+                    launch(2, 1600);
                     follower.followPath(parkPath);
                     flipper.setPosition(0);
                     setPathState(-1);
                 }
+
                 break;
-            /*case 6:
-                if (!follower.isBusy()) {
-                    follower.followPath(scorePickup3, true);
-                    setPathState(7);
-                }
-                break;
-            case 7:
-                if (!follower.isBusy()) {
-                    setPathState(-1); // End state
-                }
-                break;*/
         }
-
     }
-
 
     public void setPathState(int pState) {
         pathState = pState;
