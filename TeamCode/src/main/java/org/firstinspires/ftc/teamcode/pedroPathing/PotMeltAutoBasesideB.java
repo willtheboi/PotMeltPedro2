@@ -140,7 +140,7 @@ public abstract class PotMeltAutoBasesideB extends OpMode {
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    launch(2, 1600);
+                    launch(2, 1430);
                     purge();
                     follower.followPath(intakePath1);
                     setPathState(2);
@@ -164,7 +164,7 @@ public abstract class PotMeltAutoBasesideB extends OpMode {
 
             case 4:
                 if (!follower.isBusy()) {
-                    launch(2, 1600);
+                    launch(2, 1430);
                     follower.followPath(parkPath);
                     flipper.setPosition(0);
                     setPathState(-1);
