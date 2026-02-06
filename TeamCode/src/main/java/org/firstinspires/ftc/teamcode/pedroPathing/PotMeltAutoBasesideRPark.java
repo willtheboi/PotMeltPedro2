@@ -143,7 +143,7 @@ public abstract class PotMeltAutoBasesideRPark extends OpMode {
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    launch(2, 1600);
+                    launch(2, 1430);
                     purge();
                     follower.followPath(intakePath1);
                     setPathState(2);
@@ -153,8 +153,8 @@ public abstract class PotMeltAutoBasesideRPark extends OpMode {
                 if (!follower.isBusy()) {
                     stop_purge();
                     suck();
-                    follower.followPath(grabPath1);
-                    setPathState(3);
+                    follower.followPath(parkPath);
+                    setPathState(-1);
                 }
                 break;
             case 3:
