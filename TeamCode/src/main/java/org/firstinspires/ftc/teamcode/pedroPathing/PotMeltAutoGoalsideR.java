@@ -28,7 +28,7 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
     private int pathState;
     private final Pose startPose = new Pose(73.7, 79.8, Math.toRadians(38));
     private final Pose control1 = new Pose(51.4, 53);
-    private final Pose launchPose = new Pose(52.5, 46.1, Math.toRadians(48));
+    private final Pose launchPose = new Pose(52.5, 46.1, Math.toRadians(49));
     private final Pose intakePose = new Pose(57.1, 53.1, Math.toRadians(0));
     private final Pose grabPose = new Pose(80, 53.1, Math.toRadians(0));
     private final Pose parkPose = new Pose(60.3, 74.8, Math.toRadians(47));
@@ -162,7 +162,7 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    launch(2, 1425);
+                    launch(2, 1275);
                     purge();
                     setPathState(2);
                 }
@@ -192,7 +192,7 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
                 break;
             case 5:
                 if (!follower.isBusy()) {
-                    launch(2, 1425);
+                    launch(2, 1275);
                     purge();
                     follower.followPath(parkPath);
                     stop_purge();
