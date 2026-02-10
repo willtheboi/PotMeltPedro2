@@ -28,7 +28,7 @@ public abstract class PotMeltAutoBasesideR extends OpMode {
     private int pathState;
     private final Pose startPose = new Pose(53.8, 5.7, Math.toRadians(90));
     private final Pose control1 = new Pose(43.9, 46.2);
-    private final Pose launchPose = new Pose(50.5, 14.9, Math.toRadians(65));
+    private final Pose launchPose = new Pose(50.5, 14.9, Math.toRadians(68));
     private final Pose parkPose = new Pose(67.1, 11.6, Math.toRadians(0));
     private final Pose intakePose1 = new Pose(62.7, 26, Math.toRadians(0));
     private final Pose grabPose1 = new Pose(78.3, 26, Math.toRadians(0));
