@@ -1,8 +1,8 @@
+package org.firstinspires.ftc.teamcode;
+
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcontroller.external.samples.Teleop;
-
-@TeleOp(name = "TeleopRunnable", group = "Teleop")
+@TeleOp(name = "org.firstinspires.ftc.teamcode.TeleopRunnable", group = "Teleop")
 public class TeleopRunnable extends Teleop {
 
     // @Override
