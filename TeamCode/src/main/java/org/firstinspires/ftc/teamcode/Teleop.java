@@ -29,6 +29,7 @@
  */
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -41,16 +42,17 @@ public abstract class Teleop extends OpMode {
     // This declares the motors needed
     DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
     DcMotor intake;
-    DcMotorEx launcher;
+    DcMotorEx launcher1, launcher2;
+    Servo hood;
 
-    public static double integralSumL = 0;
+    /*public static double integralSumL = 0;
     public static double lastErrorL = 0;
 
     public static ElapsedTime timerL = new ElapsedTime();
 
     public static double Kp = 0.07;
     public static double Ki = 0.02;
-    public static double Kd = 0.01;
+    public static double Kd = 0.01;*/
 
     @Override
     public void init() {
@@ -60,7 +62,9 @@ public abstract class Teleop extends OpMode {
         backLeftDrive = hardwareMap.get(DcMotor.class, "leftRear");
         backRightDrive = hardwareMap.get(DcMotor.class, "rightRear");
         intake = hardwareMap.get(DcMotor.class, "intake");
-        launcher = hardwareMap.get(DcMotorEx.class, "launcher");
+        launcher1 = hardwareMap.get(DcMotorEx.class, "launcher1");
+        launcher2 = hardwareMap.get(DcMotorEx.class, "launcher2");
+        hood = hardwareMap.get(Servo.class, "hood");
 
         // We set the left motors in reverse which is needed for drive trains where the left
         // motors are opposite to the right ones.
@@ -69,14 +73,16 @@ public abstract class Teleop extends OpMode {
         intake.setDirection(DcMotor.Direction.FORWARD);
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
-        launcher.setDirection(DcMotor.Direction.FORWARD);
+        launcher1.setDirection(DcMotor.Direction.FORWARD);
+        launcher2.setDirection(DcMotor.Direction.FORWARD);
 
         // This uses RUN_USING_ENCODER to be more accurate.
         frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        launcher.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        launcher1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        launcher2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Set all drive motors to brake when power is zero
         frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -86,7 +92,8 @@ public abstract class Teleop extends OpMode {
 
         // Set intake motors to brake as well (optional, if you want them to stop more forcefully)
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        //launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcher1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcher2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     @Override
@@ -94,7 +101,7 @@ public abstract class Teleop extends OpMode {
 
         telemetry.addLine("The left joystick sets the robot direction");
         telemetry.addLine("Moving the right joystick left and right turns the robot");
-        telemetry.addData("Launcher Speed", launcher.getVelocity());
+        telemetry.addData("Launcher Speed", launcher1.getVelocity());
         //telemetry.addData("Launcher R Speed", launcherR.getVelocity());
         //telemetry.addData("Servo Speed", feederL.getPower());
         //telemetry.addData("Servo Speed", feederR.getPower());
@@ -110,16 +117,22 @@ public abstract class Teleop extends OpMode {
         }else{
             intake.setPower(0);
         }
+        if (gamepad2.dpad_up) {
+            hood.setPosition(1);
+        }
+        else if (gamepad2.dpad_down) {
+            hood.setPosition(-1);
+        }
+        launcher1.setVelocity(gamepad2.left_trigger*-1400);
+        launcher2.setVelocity(gamepad2.left_trigger*-1400);
 
-        double targetVelocity = gamepad2.left_trigger*1400;
-
-        double strafe = gamepad1.right_trigger - gamepad1.left_trigger;
+        /*double strafe = gamepad1.right_trigger - gamepad1.left_trigger;
         drive(-gamepad1.left_stick_y, -strafe, gamepad1.right_stick_x);
 
-        LPID(targetVelocity, launcher.getVelocity());
+        LPID(targetVelocity, launcher.getVelocity());*/
     }
 
-    public void LPID(double target, double current) {
+    /*public void LPID(double target, double current) {
 
         double integral = integralSumL;
 
@@ -132,7 +145,7 @@ public abstract class Teleop extends OpMode {
         double lastErrorL = error;
 
         timerL.reset();
-    }
+    }*/
 
     /*public void RPID(double target, double current) {
 
