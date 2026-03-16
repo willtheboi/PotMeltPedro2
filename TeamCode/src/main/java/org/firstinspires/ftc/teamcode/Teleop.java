@@ -118,13 +118,13 @@ public abstract class Teleop extends OpMode {
             intake.setPower(0);
         }
         if (gamepad2.dpad_up) {
-            hood.setPosition(1);
+            hood.setPosition(0.58);
         }
         else if (gamepad2.dpad_down) {
-            hood.setPosition(0.6);
+            hood.setPosition(0.73);
         }
-        launcher1.setVelocity(gamepad2.left_trigger*-1700);
-        launcher2.setVelocity(gamepad2.left_trigger*-1700);
+        launcher1.setVelocity(gamepad2.left_trigger*-1850);
+        launcher2.setVelocity(gamepad2.left_trigger*-1850);
 
         double strafe = gamepad1.right_trigger - gamepad1.left_trigger;
         drive(-gamepad1.left_stick_y, -strafe, gamepad1.right_stick_x);
