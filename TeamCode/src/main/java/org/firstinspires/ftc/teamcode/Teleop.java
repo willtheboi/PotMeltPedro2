@@ -121,7 +121,7 @@ public abstract class Teleop extends OpMode {
             hood.setPosition(1);
         }
         else if (gamepad2.dpad_down) {
-            hood.setPosition(-1);
+            hood.setPosition(0.6);
         }
         launcher1.setVelocity(gamepad2.left_trigger*-1700);
         launcher2.setVelocity(gamepad2.left_trigger*-1700);
