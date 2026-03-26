@@ -114,12 +114,12 @@ public abstract class Teleop extends OpMode {
 
         if (gamepad2.left_bumper) {
             intake.setPower(-1);
-            wheel.setPower(1);
+            wheel.setPower(-1);
 
             // adjust numbers to work where they put the intake on the robot
         }else if (gamepad2.right_bumper){
             intake.setPower(1);
-            wheel.setPower(-1);
+            wheel.setPower(1);
 
         }else{
             intake.setPower(0);
