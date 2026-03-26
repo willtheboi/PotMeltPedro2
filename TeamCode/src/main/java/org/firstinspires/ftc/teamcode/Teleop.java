@@ -29,6 +29,7 @@
  */
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -41,9 +42,11 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 public abstract class Teleop extends OpMode {
     // This declares the motors needed
     DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
-    DcMotor intake, wheel;
+    DcMotor intake;
     DcMotorEx launcher1, launcher2;
     Servo hood;
+
+    CRServo wheel;
 
     /*public static double integralSumL = 0;
     public static double lastErrorL = 0;
@@ -62,8 +65,8 @@ public abstract class Teleop extends OpMode {
         backLeftDrive = hardwareMap.get(DcMotor.class, "leftRear");
         backRightDrive = hardwareMap.get(DcMotor.class, "rightRear");
         intake = hardwareMap.get(DcMotor.class, "intake");
-        wheel = hardwareMap.get(DcMotor.class, "wheel");
 
+        wheel = hardwareMap.get(CRServo.class, "wheel");
         launcher1 = hardwareMap.get(DcMotorEx.class, "launcher1");
         launcher2 = hardwareMap.get(DcMotorEx.class, "launcher2");
         hood = hardwareMap.get(Servo.class, "hood");
