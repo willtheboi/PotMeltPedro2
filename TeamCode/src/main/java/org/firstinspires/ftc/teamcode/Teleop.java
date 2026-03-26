@@ -41,7 +41,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 public abstract class Teleop extends OpMode {
     // This declares the motors needed
     DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
-    DcMotor intake;
+    DcMotor intake, wheel;
     DcMotorEx launcher1, launcher2;
     Servo hood;
 
@@ -62,6 +62,8 @@ public abstract class Teleop extends OpMode {
         backLeftDrive = hardwareMap.get(DcMotor.class, "leftRear");
         backRightDrive = hardwareMap.get(DcMotor.class, "rightRear");
         intake = hardwareMap.get(DcMotor.class, "intake");
+        wheel = hardwareMap.get(DcMotor.class, "wheel");
+
         launcher1 = hardwareMap.get(DcMotorEx.class, "launcher1");
         launcher2 = hardwareMap.get(DcMotorEx.class, "launcher2");
         hood = hardwareMap.get(Servo.class, "hood");
@@ -109,13 +111,16 @@ public abstract class Teleop extends OpMode {
 
         if (gamepad2.left_bumper) {
             intake.setPower(-1);
+            wheel.setPower(1);
 
             // adjust numbers to work where they put the intake on the robot
         }else if (gamepad2.right_bumper){
             intake.setPower(1);
+            wheel.setPower(-1);
 
         }else{
             intake.setPower(0);
+            wheel.setPower(0);
         }
         if (gamepad2.dpad_up) {
             hood.setPosition(0.58);
@@ -123,8 +128,8 @@ public abstract class Teleop extends OpMode {
         else if (gamepad2.dpad_down) {
             hood.setPosition(0.73);
         }
-        launcher1.setVelocity(gamepad2.left_trigger*-1850);
-        launcher2.setVelocity(gamepad2.left_trigger*-1850);
+        launcher1.setVelocity(gamepad2.left_trigger*-1550);
+        launcher2.setVelocity(gamepad2.left_trigger*-1550);
 
         double strafe = gamepad1.right_trigger - gamepad1.left_trigger;
         drive(-gamepad1.left_stick_y, -strafe, gamepad1.right_stick_x);
