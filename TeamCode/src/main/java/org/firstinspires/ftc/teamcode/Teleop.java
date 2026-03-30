@@ -43,7 +43,7 @@ public abstract class Teleop extends OpMode {
     // This declares the motors needed
     DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
     DcMotor intake;
-    DcMotorEx launcher1, launcher2;
+    DcMotorEx launcher1, launcher2, turret;
     Servo hood;
 
     CRServo wheel;
@@ -69,6 +69,7 @@ public abstract class Teleop extends OpMode {
         wheel = hardwareMap.get(CRServo.class, "wheel");
         launcher1 = hardwareMap.get(DcMotorEx.class, "launcher1");
         launcher2 = hardwareMap.get(DcMotorEx.class, "launcher2");
+        turret = hardwareMap.get(DcMotorEx.class, "turret");
         hood = hardwareMap.get(Servo.class, "hood");
 
         // We set the left motors in reverse which is needed for drive trains where the left
@@ -99,6 +100,7 @@ public abstract class Teleop extends OpMode {
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launcher1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launcher2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     @Override
@@ -130,6 +132,15 @@ public abstract class Teleop extends OpMode {
         }
         else if (gamepad2.dpad_down) {
             hood.setPosition(0.73);
+        }
+        if (gamepad2.dpad_left) {
+            turret.setPower(0.5);
+        }
+        else if (gamepad2.dpad_right) {
+            turret.setPower(-0.5);
+        }
+        else {
+            turret.setPower(0);
         }
         launcher1.setVelocity(gamepad2.left_trigger*-1480);
         launcher2.setVelocity(gamepad2.left_trigger*-1480);
