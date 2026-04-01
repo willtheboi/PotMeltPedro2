@@ -17,10 +17,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 public abstract class PotMeltAutoBasesideBPark extends OpMode {
     DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
     DcMotor intake;
-    DcMotor transfer_motor;
-    CRServo servo_front;
-    DcMotorEx launcher;
-    Servo flipper;
+    CRServo wheel;
+    DcMotorEx launcher1, launcher2;
 
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
@@ -37,23 +35,17 @@ public abstract class PotMeltAutoBasesideBPark extends OpMode {
 
     public void launch(float spool, double power) {
         long spool_long = (long) (spool*1000);
-        launcher.setVelocity(power);
+        launcher1.setVelocity(power);
+        launcher2.setVelocity(power);
         SystemClock.sleep(spool_long);
         intake.setPower(1);
-        transfer_motor.setPower(-1);
-        servo_front.setPower(-1);
+        wheel.setPower(-1);
         SystemClock.sleep(3000);
         intake.setPower(-1);
-        transfer_motor.setPower(1);
-        servo_front.setPower(1);
-        launcher.setVelocity(power+30);
-        flipper.setPosition(1);
+        wheel.setPower(1);
         SystemClock.sleep(2000);
-        flipper.setPosition(0);
-        launcher.setVelocity(0);
         intake.setPower(0);
-        transfer_motor.setPower(0);
-        servo_front.setPower(0);
+        wheel.setPower(0);
     }
 
     public void suck() {
@@ -66,15 +58,12 @@ public abstract class PotMeltAutoBasesideBPark extends OpMode {
 
     public void purge() {
         intake.setPower(-1);
-        transfer_motor.setPower(1);
-        servo_front.setPower(1);
-        flipper.setPosition(0);
+        wheel.setPower(1);
     }
 
     public void stop_purge() {
         intake.setPower(0);
-        transfer_motor.setPower(0);
-        servo_front.setPower(0);
+        wheel.setPower(0);
     }
 
     public void buildPaths() {
@@ -109,10 +98,9 @@ public abstract class PotMeltAutoBasesideBPark extends OpMode {
     @Override
     public void init() {
         intake = hardwareMap.get(DcMotor.class, "intake");
-        launcher = hardwareMap.get(DcMotorEx.class, "launcher");
-        transfer_motor = hardwareMap.get(DcMotor.class, "transfer_motor");
-        servo_front = hardwareMap.get(CRServo.class, "servo_front");
-        flipper = hardwareMap.get(Servo.class, "flipper");
+        launcher1 = hardwareMap.get(DcMotorEx.class, "launcher1");
+        launcher2 = hardwareMap.get(DcMotorEx.class, "launcher2");
+        wheel = hardwareMap.get(CRServo.class, "wheel");
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
@@ -132,11 +120,10 @@ public abstract class PotMeltAutoBasesideBPark extends OpMode {
         follower.update();
         switch (pathState) {
             case 0:
-                launcher.setPower(0);
+                launcher1.setPower(0);
+                launcher2.setPower(0);
                 intake.setPower(0);
-                transfer_motor.setPower(0);
-                servo_front.setPower(0);
-                flipper.setPosition(0);
+                wheel.setPower(0);
                 intake.setPower(0);
                 follower.followPath(parkPath2);
                 setPathState(-1);
@@ -168,7 +155,6 @@ public abstract class PotMeltAutoBasesideBPark extends OpMode {
                 if (!follower.isBusy()) {
                     launch(2, 1600);
                     follower.followPath(parkPath);
-                    flipper.setPosition(0);
                     setPathState(-1);
                 }
 

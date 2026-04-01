@@ -18,10 +18,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 public abstract class PotMeltAutoGoalsideR extends OpMode {
     DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
     DcMotor intake;
-    DcMotor transfer_motor;
-    CRServo servo_front;
-    DcMotorEx launcher;
-    Servo flipper;
+    CRServo wheel;
+    DcMotorEx launcher1, launcher2, turret;
+    Servo hood;
 
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
@@ -29,8 +28,8 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
     private final Pose startPose = new Pose(73.7, 79.8, Math.toRadians(38));
     private final Pose control1 = new Pose(51.4, 53);
     private final Pose launchPose = new Pose(52.5, 46.1, Math.toRadians(49));
-    private final Pose intakePose = new Pose(57.1, 53.1, Math.toRadians(0));
-    private final Pose grabPose = new Pose(80, 53.1, Math.toRadians(0));
+    private final Pose intakePose = new Pose(57.1, 57, Math.toRadians(0));
+    private final Pose grabPose = new Pose(73, 57, Math.toRadians(0));
     private final Pose parkPose = new Pose(60.3, 74.8, Math.toRadians(47));
 
     private Path launchPath1;
@@ -40,45 +39,39 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
         SystemClock.sleep(time);
     }
 
-    public void launch(float spool, double power) {
-        long spool_long = (long) (spool*1000);
-        launcher.setVelocity(power);
-        SystemClock.sleep(spool_long);
+    public void launch(double power) {
+        launcher1.setVelocity(-power);
+        launcher2.setVelocity(-power);
+        SystemClock.sleep(200);
         intake.setPower(1);
-        transfer_motor.setPower(-1);
-        servo_front.setPower(-1);
-        SystemClock.sleep(3000);
-        intake.setPower(-1);
-        transfer_motor.setPower(1);
-        servo_front.setPower(1);
-        launcher.setVelocity(power+30);
-        flipper.setPosition(1);
+        wheel.setPower(1);
         SystemClock.sleep(2000);
-        launcher.setVelocity(0);
+        launcher1.setVelocity(0);
+        launcher2.setVelocity(0);
         intake.setPower(0);
-        transfer_motor.setPower(0);
-        servo_front.setPower(0);
+        wheel.setPower(0);
     }
 
     public void suck() {
-        intake.setPower(1);
+        wheel.setPower(-1);
+        intake.setPower(0.6);
     }
 
     public void no_suck() {
+        intake.setPower(-0.1);
+        sleep(900);
         intake.setPower(0);
+        //wheel.setPower(0);
     }
 
     public void purge() {
         intake.setPower(-1);
-        transfer_motor.setPower(1);
-        servo_front.setPower(1);
-        flipper.setPosition(0);
+        wheel.setPower(-1);
     }
 
     public void stop_purge() {
         intake.setPower(0);
-        transfer_motor.setPower(0);
-        servo_front.setPower(0);
+        wheel.setPower(0);
     }
 
     public void buildPaths() {
@@ -124,10 +117,11 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
     @Override
     public void init() {
         intake = hardwareMap.get(DcMotor.class, "intake");
-        launcher = hardwareMap.get(DcMotorEx.class, "launcher");
-        transfer_motor = hardwareMap.get(DcMotor.class, "transfer_motor");
-        servo_front = hardwareMap.get(CRServo.class, "servo_front");
-        flipper = hardwareMap.get(Servo.class, "flipper");
+        launcher1 = hardwareMap.get(DcMotorEx.class, "launcher1");
+        launcher2 = hardwareMap.get(DcMotorEx.class, "launcher2");
+        turret = hardwareMap.get(DcMotorEx.class, "turret");
+        wheel = hardwareMap.get(CRServo.class, "wheel");
+        hood = hardwareMap.get(Servo.class, "hood");
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
@@ -135,9 +129,10 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
         buildPaths();
         follower.setStartingPose(startPose);
 
-        launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        transfer_motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcher1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcher2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
     }
 
@@ -152,17 +147,20 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
         follower.update();
         switch (pathState) {
             case 0:
-                launcher.setPower(0);
+                launcher1.setPower(0);
+                launcher2.setPower(0);
+                turret.setPower(0);
                 intake.setPower(0);
-                transfer_motor.setPower(0);
-                servo_front.setPower(0);
-                flipper.setPosition(0);
+                wheel.setPower(0);
+                hood.setPosition(0.73);
+                launcher1.setVelocity(-1200);
+                launcher2.setVelocity(-1200);
                 follower.followPath(launchPath1);
                 setPathState(1);
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    launch(2, 1275);
+                    launch(1200);
                     purge();
                     setPathState(2);
                 }
@@ -184,7 +182,10 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
             case 4:
                 if (!follower.isBusy()) {
                     sleep(1000);
-                    no_suck();
+                    //no_suck();
+                    wheel.setPower(-1);
+                    intake.setPower(-0.2);
+                    sleep(500);
                     follower.followPath(launchPath2);
                     setPathState(5);
                 }
@@ -192,11 +193,10 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
                 break;
             case 5:
                 if (!follower.isBusy()) {
-                    launch(2, 1275);
+                    launch(1200);
                     purge();
                     follower.followPath(parkPath);
                     stop_purge();
-                    flipper.setPosition(0);
                     setPathState(-1);
                 }
                 break;

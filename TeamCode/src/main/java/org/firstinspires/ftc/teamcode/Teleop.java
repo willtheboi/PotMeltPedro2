@@ -75,11 +75,11 @@ public abstract class Teleop extends OpMode {
         // motors are opposite to the right ones.
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
-        intake.setDirection(DcMotor.Direction.FORWARD);
         backRightDrive.setDirection(DcMotor.Direction.FORWARD);
         frontRightDrive.setDirection(DcMotor.Direction.FORWARD);
         launcher1.setDirection(DcMotor.Direction.FORWARD);
         launcher2.setDirection(DcMotor.Direction.FORWARD);
+        intake.setDirection(DcMotor.Direction.FORWARD);
 
         // This uses RUN_USING_ENCODER to be more accurate.
         frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -114,28 +114,28 @@ public abstract class Teleop extends OpMode {
 
         if (gamepad2.left_bumper) {
             intake.setPower(-1);
-            wheel.setPower(1);
+            wheel.setPower(-1);
 
             // adjust numbers to work where they put the intake on the robot
         }else if (gamepad2.right_bumper){
             intake.setPower(1);
-            wheel.setPower(-1);
+            wheel.setPower(1);
 
         }else{
             intake.setPower(0);
             wheel.setPower(0);
         }
         if (gamepad2.dpad_up) {
-            hood.setPosition(0.58);
+            hood.setPosition(0.58); //highest position
         }
         else if (gamepad2.dpad_down) {
-            hood.setPosition(0.73);
+            hood.setPosition(0.73); //lowest position
         }
         launcher1.setVelocity(gamepad2.left_trigger*-1550);
         launcher2.setVelocity(gamepad2.left_trigger*-1550);
 
         double strafe = gamepad1.right_trigger - gamepad1.left_trigger;
-        drive(-gamepad1.left_stick_y, -strafe, gamepad1.right_stick_x);
+        drive(-gamepad1.left_stick_y, strafe, gamepad1.right_stick_x);
 
         /*LPID(targetVelocity, launcher.getVelocity());*/
     }
