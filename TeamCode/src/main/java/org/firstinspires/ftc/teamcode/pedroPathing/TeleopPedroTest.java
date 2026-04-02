@@ -18,6 +18,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -27,12 +28,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import java.util.function.Supplier;
 
 @Configurable
-@TeleOp
+@TeleOp(name = "Pedro Test Teleop", group = "TeleOp")
 public class TeleopPedroTest extends OpMode {
 
     DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
     DcMotor intake;
-    DcMotorEx launcher1, launcher2;
+    DcMotorEx launcher1, launcher2, turretMotor;
     Servo hood;
 
     CRServo wheel;
@@ -47,8 +48,10 @@ public class TeleopPedroTest extends OpMode {
     public static double Kp = 0.07;
     public static double Ki = 0.02;
     public static double Kd = 0.01;*/
+    public static ElapsedTime timer = new ElapsedTime();
+
     private boolean relocalizeToggle = false;
-    private boolean relocalizeButtonToggle = true;
+    private boolean relocalizeButtonToggle = false;
     double timeSinceLocalized = 0;
 
     Limelight3A limelight;
@@ -77,6 +80,8 @@ public class TeleopPedroTest extends OpMode {
         wheel = hardwareMap.get(CRServo.class, "wheel");
         launcher1 = hardwareMap.get(DcMotorEx.class, "launcher1");
         launcher2 = hardwareMap.get(DcMotorEx.class, "launcher2");
+        turretMotor = hardwareMap.get(DcMotorEx.class, "turret");
+
         hood = hardwareMap.get(Servo.class, "hood");
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -87,13 +92,19 @@ public class TeleopPedroTest extends OpMode {
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launcher1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launcher2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
+
+    boolean opModeIsStarted = false;
 
     @Override
     public void start() {
         //The parameter controls whether the Follower should use break mode on the motors (using it is recommended).
         //In order to use float mode, add .useBrakeModeInTeleOp(true); to your Drivetrain Constants in Constant.java (for Mecanum)
         //If you don't pass anything in, it uses the default (false)
+        opModeIsStarted = false;
+
         follower.startTeleopDrive();
     }
 
@@ -126,9 +137,10 @@ public class TeleopPedroTest extends OpMode {
 
 
 
-        telemetry.addLine("The left joystick sets the robot direction");
-        telemetry.addLine("Moving the right joystick left and right turns the robot");
-        telemetry.addData("Launcher Speed", launcher1.getVelocity());
+
+
+
+        //telemetry.addData("Launcher Speed", launcher1.getVelocity());
         //telemetry.addData("Launcher R Speed", launcherR.getVelocity());
         //telemetry.addData("Servo Speed", feederL.getPower());
         //telemetry.addData("Servo Speed", feederR.getPower());
@@ -155,30 +167,42 @@ public class TeleopPedroTest extends OpMode {
             hood.setPosition(0.73);
         }
 
-        if(gamepad1.a){
-            timeSinceLocalized = time;
+        LLResult result = limelight.getLatestResult();
 
-            if(timeSinceLocalized - time > 5000){
-                relocalizeButtonToggle = true;
+
+        if(gamepad1.a){
+            if (result != null) {
+                if (result.isValid()) {
+                    follower.setPose(botCameraPose);
+                }
             }
         }
 
-        if(relocalizeButtonToggle){
-            follower.setPose(botCameraPose);
-            relocalizeButtonToggle = false;
+        relocalizationUpdate(limelight, telemetry);
+
+        if (opModeIsStarted) {
+            turretMotor.setTargetPosition((int) turretTargetGoal);
+            telemetry.addData("turret Clicks: ", turretMotor.getCurrentPosition());
+
+            if (((turretMotor.getTargetPosition() + (degreesToTurnCorrected * degsPerClick) > -652 && (turretMotor.getTargetPosition() + (degreesToTurnCorrected * degsPerClick) < 652))))
+            {
+                turretMotor.setTargetPosition((int) (turretMotor.getCurrentPosition() + (degreesToTurnCorrected * degsPerClick)));
+            }
+
         }
 
+
         telemetry.addData("PedroFollower: ", follower.getPose());
+        telemetry.addData("Bot Camera Pose: ", botCameraPose.getPose());
+
+
         telemetry.update();
 
-        relocalizationUpdate(limelight, telemetry);
+
 
         launcher1.setVelocity(gamepad2.left_trigger*-1550);
         launcher2.setVelocity(gamepad2.left_trigger*-1550);
 
-        telemetryM.debug("position", follower.getPose());
-        telemetryM.debug("velocity", follower.getVelocity());
-        telemetryM.debug("automatedDrive", automatedDrive);
     }
 
     private Pose getFTCPoseAsPedro(Pose2D ftcPose) {
@@ -194,18 +218,69 @@ public class TeleopPedroTest extends OpMode {
         if (result != null) {
             if (result.isValid()) {
 
-                relocalizeToggle = true;
-
                 botpose2D = new Pose2D(DistanceUnit.INCH, result.getBotpose().getPosition().x * 39.37008, result.getBotpose().getPosition().y * 39.37008, AngleUnit.RADIANS, follower.getHeading());
                 botPoseAsPedro = getFTCPoseAsPedro(botpose2D);
 
                 telemetry.addData("Limelight Coordinates As Pedro: ", getFTCPoseAsPedro(botpose2D));
 
                 botCameraPose = new Pose(botPoseAsPedro.getX(), botPoseAsPedro.getY(), follower.getHeading());
-            } else {
-                relocalizeToggle = false;
             }
 
         }
+    }
+
+    private double convertTo360Coordinates(double angleInDegrees){
+        if(angleInDegrees < 0){
+            return angleInDegrees + 360;
+        }else{
+            return angleInDegrees;
+        }
+    }
+
+    public double degreesToTurnCorrected = 0;
+    public Pose targetPoseBlue = new Pose(5, 142);
+    public Pose targetPoseRed = new Pose(140, 140);
+    public double encoderClicksPerDeg = 360d / 1800d; //limits: -1197, 1197
+    public double degsPerClick = 1800d / 360d;
+
+
+    double turretTargetGoal = 0;
+    public void turretMovement(boolean isRed){
+
+        Pose targetPosition;
+
+        double turretRobotCoordinates = convertTo360Coordinates(turretMotor.getCurrentPosition() * encoderClicksPerDeg);
+
+        telemetry.addData("Robot Polar Coordinates: ", turretRobotCoordinates);
+
+        double turretPolarCoordinates;
+
+        turretPolarCoordinates =  (turretRobotCoordinates + convertTo360Coordinates(Math.toDegrees(follower.getPose().getHeading()))) % 360;
+
+        telemetry.addData("degree conversion: ", Math.toDegrees(follower.getPose().getHeading()));
+
+        if (isRed) {
+            targetPosition = targetPoseRed;
+        } else {
+            targetPosition = targetPoseBlue;
+        }
+
+        double polarCoordinateTargetToRobot =  Math.toDegrees(Math.atan2(targetPosition.getY() - follower.getPose().getY(), targetPosition.getX() - follower.getPose().getX()));
+        double degreesToTurnRaw = polarCoordinateTargetToRobot - turretPolarCoordinates;
+
+
+        if (degreesToTurnRaw + 360 < Math.abs(degreesToTurnRaw)){
+            degreesToTurnCorrected = degreesToTurnRaw + 360;
+        }else{
+            degreesToTurnCorrected = degreesToTurnRaw;
+        }
+
+        telemetry.addData("polar Corrdinate Target to robot: ", polarCoordinateTargetToRobot);
+        telemetry.addData("Deg To Turn Raw: ", degreesToTurnRaw);
+        telemetry.addData("Deg To Turn Corrected: ", degreesToTurnCorrected);
+
+        telemetry.addData("Turret Polar: ", turretPolarCoordinates);
+        turretTargetGoal = turretMotor.getCurrentPosition() + (degreesToTurnCorrected * degsPerClick);
+
     }
 }
