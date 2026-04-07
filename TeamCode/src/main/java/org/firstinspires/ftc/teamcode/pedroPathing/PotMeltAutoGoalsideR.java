@@ -42,8 +42,8 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
     public void launch(double power) {
         launcher1.setVelocity(-power);
         launcher2.setVelocity(-power);
-        SystemClock.sleep(200);
-        intake.setPower(1);
+        SystemClock.sleep(500);
+        intake.setPower(0.6);
         wheel.setPower(1);
         SystemClock.sleep(2000);
         launcher1.setVelocity(0);
@@ -53,7 +53,7 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
     }
 
     public void suck() {
-        wheel.setPower(-1);
+        wheel.setPower(-0.8);
         intake.setPower(0.6);
     }
 
@@ -153,14 +153,14 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
                 intake.setPower(0);
                 wheel.setPower(0);
                 hood.setPosition(0.73);
-                launcher1.setVelocity(-1200);
-                launcher2.setVelocity(-1200);
+                launcher1.setVelocity(-1250);
+                launcher2.setVelocity(-1250);
                 follower.followPath(launchPath1);
                 setPathState(1);
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    launch(1200);
+                    launch(1270);
                     purge();
                     setPathState(2);
                 }
@@ -181,10 +181,12 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
                 break;
             case 4:
                 if (!follower.isBusy()) {
+                    launcher1.setVelocity(-1250);
+                    launcher2.setVelocity(-1250);
                     sleep(1000);
                     //no_suck();
-                    wheel.setPower(-1);
-                    intake.setPower(-0.2);
+                    wheel.setPower(-0.6);
+                    //intake.setPower(-0.1);
                     sleep(500);
                     follower.followPath(launchPath2);
                     setPathState(5);
@@ -193,7 +195,7 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
                 break;
             case 5:
                 if (!follower.isBusy()) {
-                    launch(1200);
+                    launch(1270);
                     purge();
                     follower.followPath(parkPath);
                     stop_purge();

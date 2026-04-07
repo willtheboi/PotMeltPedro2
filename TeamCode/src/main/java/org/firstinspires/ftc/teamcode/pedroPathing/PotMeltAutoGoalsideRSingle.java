@@ -26,7 +26,7 @@ public abstract class PotMeltAutoGoalsideRSingle extends OpMode {
     private int pathState;
     private final Pose startPose = new Pose(73.7, 79.8, Math.toRadians(38));
     private final Pose control1 = new Pose(51.4, 53);
-    private final Pose launchPose = new Pose(51.5, 46.1, Math.toRadians(48));
+    private final Pose launchPose = new Pose(52.5, 46.1, Math.toRadians(48));
     private final Pose intakePose = new Pose(57.1, 51.1, Math.toRadians(0));
     private final Pose grabPose = new Pose(70.9, 53.1, Math.toRadians(0));
     private final Pose parkPose = new Pose(60.3, 74.8, Math.toRadians(47));

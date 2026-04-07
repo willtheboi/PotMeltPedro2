@@ -28,10 +28,10 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
     private int pathState;
     private final Pose startPose = new Pose(15.5, 78.9, Math.toRadians(144));
     private final Pose control1 = new Pose(40.1, 53);
-    private final Pose launchPose = new Pose(37.7, 51, Math.toRadians(136));
-    private final Pose intakePose = new Pose(35.2, 52.1, Math.toRadians(180));
-    private final Pose grabPose = new Pose(12, 51.1, Math.toRadians(180));
-    private final Pose parkPose = new Pose(29.7, 76.4, Math.toRadians(270));
+    private final Pose launchPose = new Pose(37.7, 51, Math.toRadians(140));
+    private final Pose intakePose = new Pose(35.2, 57.1, Math.toRadians(180));
+    private final Pose grabPose = new Pose(13, 57.1, Math.toRadians(180));
+    private final Pose parkPose = new Pose(25, 80, Math.toRadians(140));
 
     private Path launchPath1;
     private PathChain intakePath1, grabPath1, launchPath2, parkPath, scorePickup2, grabPickup3, scorePickup3;
@@ -40,18 +40,12 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
         SystemClock.sleep(time);
     }
 
-    public void launch(float spool, double power) {
-        long spool_long = (long) (spool*1000);
-        launcher1.setVelocity(power);
-        launcher2.setVelocity(power);
-        SystemClock.sleep(spool_long);
-        intake.setPower(1);
-        wheel.setPower(-1);
-        SystemClock.sleep(3000);
-        intake.setPower(-1);
+    public void launch(double power) {
+        launcher1.setVelocity(-power);
+        launcher2.setVelocity(-power);
+        SystemClock.sleep(500);
+        intake.setPower(0.6);
         wheel.setPower(1);
-        launcher1.setVelocity(power+30);
-        launcher2.setVelocity(power+30);
         SystemClock.sleep(2000);
         launcher1.setVelocity(0);
         launcher2.setVelocity(0);
@@ -153,7 +147,7 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    launch(2, 1275);
+                    launch(1200);
                     purge();
                     setPathState(2);
                 }
@@ -183,8 +177,7 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
                 break;
             case 5:
                 if (!follower.isBusy()) {
-                    launch(2, 1275);
-                    purge();
+                    launch(1200);
                     follower.followPath(parkPath);
                     setPathState(-1);
                 }
