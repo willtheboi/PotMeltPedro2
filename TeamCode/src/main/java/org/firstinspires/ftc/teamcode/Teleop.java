@@ -29,6 +29,8 @@
  */
 package org.firstinspires.ftc.teamcode;
 
+import static java.util.logging.Logger.global;
+
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -43,7 +45,7 @@ public abstract class Teleop extends OpMode {
     // This declares the motors needed
     DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
     DcMotor intake;
-    DcMotorEx launcher1, launcher2;
+    DcMotorEx launcher1, launcher2, turret;
     Servo hood;
 
     CRServo wheel;
@@ -57,6 +59,8 @@ public abstract class Teleop extends OpMode {
     public static double Ki = 0.02;
     public static double Kd = 0.01;*/
 
+    public int turretLock;
+
     @Override
     public void init() {
 
@@ -65,6 +69,7 @@ public abstract class Teleop extends OpMode {
         backLeftDrive = hardwareMap.get(DcMotor.class, "leftRear");
         backRightDrive = hardwareMap.get(DcMotor.class, "rightRear");
         intake = hardwareMap.get(DcMotor.class, "intake");
+        turret = hardwareMap.get(DcMotorEx.class, "turret");
 
         wheel = hardwareMap.get(CRServo.class, "wheel");
         launcher1 = hardwareMap.get(DcMotorEx.class, "launcher1");
@@ -88,6 +93,7 @@ public abstract class Teleop extends OpMode {
         backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         launcher1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         launcher2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        turret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Set all drive motors to brake when power is zero
         frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -97,8 +103,11 @@ public abstract class Teleop extends OpMode {
 
         // Set intake motors to brake as well (optional, if you want them to stop more forcefully)
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launcher1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launcher2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        turretLock = turret.getCurrentPosition();
     }
 
     @Override
@@ -107,10 +116,13 @@ public abstract class Teleop extends OpMode {
         telemetry.addLine("The left joystick sets the robot direction");
         telemetry.addLine("Moving the right joystick left and right turns the robot");
         telemetry.addData("Launcher Speed", launcher1.getVelocity());
+        telemetry.addData("Launcher Speed", turret.getVelocity());
         //telemetry.addData("Launcher R Speed", launcherR.getVelocity());
         //telemetry.addData("Servo Speed", feederL.getPower());
         //telemetry.addData("Servo Speed", feederR.getPower());
         telemetry.update();
+
+        turret.setTargetPosition(turretLock);
 
         if (gamepad2.left_bumper) {
             intake.setPower(-1);
