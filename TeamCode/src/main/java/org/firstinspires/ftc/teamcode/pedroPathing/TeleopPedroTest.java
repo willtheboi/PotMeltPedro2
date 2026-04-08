@@ -178,7 +178,7 @@ public class TeleopPedroTest extends OpMode {
             }
         }
 
-        relocalizationUpdate(limelight, telemetry);
+        //relocalizationUpdate(limelight, telemetry);
         turretMovement(true);
 
         if (opModeIsStarted) {
@@ -206,7 +206,7 @@ public class TeleopPedroTest extends OpMode {
     }
 
     Pose botCameraPose;
-    public void relocalizationUpdate(Limelight3A limelight, Telemetry telemetry){
+    /*public void relocalizationUpdate(Limelight3A limelight, Telemetry telemetry){
         LLResult result = limelight.getLatestResult();
         Pose2D botpose2D;
         Pose botPoseAsPedro;
@@ -227,7 +227,7 @@ public class TeleopPedroTest extends OpMode {
             }
 
         }
-    }
+    }*/
 
     private double normalizeAngle(double angle) {
         angle = angle % 360;

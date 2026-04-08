@@ -124,6 +124,9 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
         wheel = hardwareMap.get(CRServo.class, "wheel");
         hood = hardwareMap.get(Servo.class, "hood");
 
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcher1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcher2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         pathTimer = new Timer();
         opmodeTimer = new Timer();
@@ -149,12 +152,14 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
                 intake.setPower(0);
                 wheel.setPower(0);
                 hood.setPosition(0.73);
+                launcher1.setVelocity(-1250);
+                launcher2.setVelocity(-1250);
                 follower.followPath(launchPath1);
                 setPathState(1);
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    launch(1200);
+                    launch(1270);
                     purge();
                     setPathState(2);
                 }
@@ -175,8 +180,14 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
                 break;
             case 4:
                 if (!follower.isBusy()) {
+                    intake.setPower(0);
+                    launcher1.setVelocity(-1250);
+                    launcher2.setVelocity(-1250);
                     sleep(1000);
-                    no_suck();
+                    //no_suck();
+                    wheel.setPower(-0.6);
+                    //intake.setPower(-0.1);
+                    sleep(500);
                     follower.followPath(launchPath2);
                     setPathState(5);
                 }
@@ -184,7 +195,7 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
                 break;
             case 5:
                 if (!follower.isBusy()) {
-                    launch(1200);
+                    launch(1270);
                     follower.followPath(parkPath);
                     setPathState(-1);
                 }
