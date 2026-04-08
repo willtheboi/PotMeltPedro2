@@ -20,46 +20,53 @@ public abstract class PotMeltAutoBasesideR extends OpMode {
     DcMotor intake;
     CRServo wheel;
     DcMotorEx launcher1, launcher2;
+    Servo hood;
 
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
     private int pathState;
     private final Pose startPose = new Pose(53.8, 5.7, Math.toRadians(90));
     private final Pose control1 = new Pose(43.9, 46.2);
-    private final Pose launchPose = new Pose(50.5, 14.9, Math.toRadians(68));
-    private final Pose parkPose = new Pose(67.1, 11.6, Math.toRadians(0));
-    private final Pose intakePose1 = new Pose(62.7, 26, Math.toRadians(0));
-    private final Pose grabPose1 = new Pose(78.3, 26, Math.toRadians(0));
+    private final Pose launchPose = new Pose(50.5, 11, Math.toRadians(72));
+    private final Pose parkPose = new Pose(63, 18, Math.toRadians(0));
+    private final Pose intakePose1 = new Pose(48, 32, Math.toRadians(0));
+    private final Pose grabPose1 = new Pose(71, 32, Math.toRadians(0));
 
     private Path launchPath1;
     private PathChain parkPath, grabPath1, intakePath1, launchPath2;
 
-    public void launch(float spool, double power) {
-        long spool_long = (long) (spool*1000);
-        launcher1.setVelocity(power);
-        launcher2.setVelocity(power);
-        SystemClock.sleep(spool_long);
-        intake.setPower(1);
-        wheel.setPower(-1);
-        SystemClock.sleep(3000);
-        intake.setPower(-1);
-        wheel.setPower(1);
+    public void sleep(long time) {
+        SystemClock.sleep(time);
+    }
+
+    public void launch(double power) {
+        launcher1.setVelocity(-power);
+        launcher2.setVelocity(-power);
+        SystemClock.sleep(200);
+        intake.setPower(0.6);
+        wheel.setPower(0.6);
         SystemClock.sleep(2000);
+        launcher1.setVelocity(0);
+        launcher2.setVelocity(0);
         intake.setPower(0);
         wheel.setPower(0);
     }
 
     public void suck() {
-        intake.setPower(1);
+        wheel.setPower(-0.8);
+        intake.setPower(0.6);
     }
 
     public void no_suck() {
+        intake.setPower(-0.1);
+        sleep(900);
         intake.setPower(0);
+        //wheel.setPower(0);
     }
 
     public void purge() {
         intake.setPower(-1);
-        wheel.setPower(1);
+        wheel.setPower(-1);
     }
 
     public void stop_purge() {
@@ -98,6 +105,7 @@ public abstract class PotMeltAutoBasesideR extends OpMode {
         launcher1 = hardwareMap.get(DcMotorEx.class, "launcher1");
         launcher2 = hardwareMap.get(DcMotorEx.class, "launcher2");
         wheel = hardwareMap.get(CRServo.class, "wheel");
+        hood = hardwareMap.get(Servo.class, "hood");
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
@@ -122,12 +130,16 @@ public abstract class PotMeltAutoBasesideR extends OpMode {
                 intake.setPower(0);
                 wheel.setPower(0);
                 intake.setPower(0);
+                hood.setPosition(0.6);
+                launcher1.setPower(-1590);
+                launcher2.setPower(-1590);
+                sleep(500);
                 follower.followPath(launchPath1);
                 setPathState(1);
                 break;
             case 1:
                 if (!follower.isBusy()) {
-                    launch(2, 1430);
+                    launch(1590);
                     purge();
                     follower.followPath(intakePath1);
                     setPathState(2);
@@ -143,7 +155,14 @@ public abstract class PotMeltAutoBasesideR extends OpMode {
                 break;
             case 3:
                 if (!follower.isBusy()) {
-                    no_suck();
+                    sleep(500);
+                    intake.setPower(0.05);
+                    //no_suck();
+                    wheel.setPower(-0.6);
+                    sleep(500);
+                    launcher1.setPower(-1500);
+                    launcher2.setPower(-1500);
+                    sleep(1000);
                     follower.followPath(launchPath2);
                     setPathState(4);
                 }
@@ -151,7 +170,7 @@ public abstract class PotMeltAutoBasesideR extends OpMode {
 
             case 4:
                 if (!follower.isBusy()) {
-                    launch(2, 1430);
+                    launch(1520);
                     follower.followPath(parkPath);
                     setPathState(-1);
                 }

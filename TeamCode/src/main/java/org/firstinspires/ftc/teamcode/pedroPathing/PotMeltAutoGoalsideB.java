@@ -22,6 +22,7 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
     DcMotor intake;
     CRServo wheel;
     DcMotorEx launcher1, launcher2;
+    Servo hood;
 
     private Follower follower;
     private Timer pathTimer, opmodeTimer;
@@ -44,7 +45,7 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
         launcher1.setVelocity(-power);
         launcher2.setVelocity(-power);
         SystemClock.sleep(500);
-        intake.setPower(0.6);
+        intake.setPower(0.8);
         wheel.setPower(1);
         SystemClock.sleep(2000);
         launcher1.setVelocity(0);
@@ -54,16 +55,20 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
     }
 
     public void suck() {
-        intake.setPower(1);
+        wheel.setPower(-0.8);
+        intake.setPower(0.6);
     }
 
     public void no_suck() {
+        intake.setPower(-0.1);
+        sleep(900);
         intake.setPower(0);
+        //wheel.setPower(0);
     }
 
     public void purge() {
         intake.setPower(-1);
-        wheel.setPower(1);
+        wheel.setPower(-1);
     }
 
     public void stop_purge() {
@@ -117,6 +122,7 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
         launcher1 = hardwareMap.get(DcMotorEx.class, "launcher1");
         launcher2 = hardwareMap.get(DcMotorEx.class, "launcher2");
         wheel = hardwareMap.get(CRServo.class, "wheel");
+        hood = hardwareMap.get(Servo.class, "hood");
 
 
         pathTimer = new Timer();
@@ -142,6 +148,7 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
                 launcher2.setPower(0);
                 intake.setPower(0);
                 wheel.setPower(0);
+                hood.setPosition(0.73);
                 follower.followPath(launchPath1);
                 setPathState(1);
                 break;

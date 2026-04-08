@@ -43,7 +43,7 @@ public abstract class PotMeltAutoGoalsideR extends OpMode {
         launcher1.setVelocity(-power);
         launcher2.setVelocity(-power);
         SystemClock.sleep(500);
-        intake.setPower(0.6);
+        intake.setPower(0.8);
         wheel.setPower(1);
         SystemClock.sleep(2000);
         launcher1.setVelocity(0);
