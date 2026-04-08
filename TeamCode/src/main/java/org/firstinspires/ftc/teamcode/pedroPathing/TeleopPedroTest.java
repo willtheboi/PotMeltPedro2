@@ -1,5 +1,4 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
-import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.follower;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -26,6 +25,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
 import java.util.function.Supplier;
+
 
 @Configurable
 @TeleOp(name = "Pedro Test Teleop", group = "TeleOp")
@@ -92,8 +92,8 @@ public class TeleopPedroTest extends OpMode {
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launcher1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launcher2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     boolean opModeIsStarted = false;
@@ -103,7 +103,7 @@ public class TeleopPedroTest extends OpMode {
         //The parameter controls whether the Follower should use break mode on the motors (using it is recommended).
         //In order to use float mode, add .useBrakeModeInTeleOp(true); to your Drivetrain Constants in Constant.java (for Mecanum)
         //If you don't pass anything in, it uses the default (false)
-        opModeIsStarted = false;
+        opModeIsStarted =true;
 
         follower.startTeleopDrive();
     }
@@ -179,21 +179,17 @@ public class TeleopPedroTest extends OpMode {
         }
 
         relocalizationUpdate(limelight, telemetry);
+        turretMovement(true);
 
         if (opModeIsStarted) {
             turretMotor.setTargetPosition((int) turretTargetGoal);
             telemetry.addData("turret Clicks: ", turretMotor.getCurrentPosition());
 
-            if (((turretMotor.getTargetPosition() + (degreesToTurnCorrected * degsPerClick) > -652 && (turretMotor.getTargetPosition() + (degreesToTurnCorrected * degsPerClick) < 652))))
-            {
-                turretMotor.setTargetPosition((int) (turretMotor.getCurrentPosition() + (degreesToTurnCorrected * degsPerClick)));
-            }
-
         }
 
 
         telemetry.addData("PedroFollower: ", follower.getPose());
-        telemetry.addData("Bot Camera Pose: ", botCameraPose.getPose());
+        //telemetry.addData("Bot Camera Pose: ", botCameraPose.getPose());
 
 
         telemetry.update();
@@ -218,69 +214,70 @@ public class TeleopPedroTest extends OpMode {
         if (result != null) {
             if (result.isValid()) {
 
-                botpose2D = new Pose2D(DistanceUnit.INCH, result.getBotpose().getPosition().x * 39.37008, result.getBotpose().getPosition().y * 39.37008, AngleUnit.RADIANS, follower.getHeading());
+                relocalizeToggle = true;
+
+                botpose2D = new Pose2D(DistanceUnit.INCH, result.getBotpose().getPosition().x * 39.37008, result.getBotpose().getPosition().y * 39.37008, AngleUnit.RADIANS, PedroComponent.follower().getHeading());
                 botPoseAsPedro = getFTCPoseAsPedro(botpose2D);
 
                 telemetry.addData("Limelight Coordinates As Pedro: ", getFTCPoseAsPedro(botpose2D));
 
-                botCameraPose = new Pose(botPoseAsPedro.getX(), botPoseAsPedro.getY(), follower.getHeading());
+                botCameraPose = new Pose(botPoseAsPedro.getX(), botPoseAsPedro.getY(), PedroComponent.follower().getHeading());
+            } else {
+                relocalizeToggle = false;
             }
 
         }
     }
 
-    private double convertTo360Coordinates(double angleInDegrees){
-        if(angleInDegrees < 0){
-            return angleInDegrees + 360;
-        }else{
-            return angleInDegrees;
-        }
+    private double normalizeAngle(double angle) {
+        angle = angle % 360;
+        if (angle > 180) return angle - 360;
+        if (angle < -180) return angle + 360;
+        return angle;
     }
 
     public double degreesToTurnCorrected = 0;
     public Pose targetPoseBlue = new Pose(5, 142);
     public Pose targetPoseRed = new Pose(140, 140);
-    public double encoderClicksPerDeg = 360d / 1800d; //limits: -1197, 1197
-    public double degsPerClick = 1800d / 360d;
+    public double encoderClicksPerDeg = 360d / 1445.58d; //limits: -1197, 1197
+    public double degsPerClick = 1445.58d / 360d;
 
 
     double turretTargetGoal = 0;
     public void turretMovement(boolean isRed){
+        // Select target
+        Pose targetPosition = isRed ? targetPoseRed : targetPoseBlue;
 
-        Pose targetPosition;
+        // Robot pose
+        Pose robotPose = follower.getPose();
 
-        double turretRobotCoordinates = convertTo360Coordinates(turretMotor.getCurrentPosition() * encoderClicksPerDeg);
+        // Absolute angle from robot to target in degrees
+        double targetAngleDeg = Math.toDegrees(Math.atan2(
+                targetPosition.getY() - robotPose.getY(),
+                targetPosition.getX() - robotPose.getX()
+        ));
 
-        telemetry.addData("Robot Polar Coordinates: ", turretRobotCoordinates);
+        // Convert robot heading to degrees
+        double robotHeadingDeg = Math.toDegrees(robotPose.getHeading());
 
-        double turretPolarCoordinates;
+        // Turret angle relative to field
+        double turretCurrentDeg = turretMotor.getCurrentPosition() * encoderClicksPerDeg + robotHeadingDeg;
 
-        turretPolarCoordinates =  (turretRobotCoordinates + convertTo360Coordinates(Math.toDegrees(follower.getPose().getHeading()))) % 360;
+        // Compute path difference
+        double deltaDeg = normalizeAngle(targetAngleDeg - turretCurrentDeg);
 
-        telemetry.addData("degree conversion: ", Math.toDegrees(follower.getPose().getHeading()));
+        // Set absolute target in encoder ticks
+        turretTargetGoal = turretMotor.getCurrentPosition() + deltaDeg * degsPerClick;
 
-        if (isRed) {
-            targetPosition = targetPoseRed;
-        } else {
-            targetPosition = targetPoseBlue;
-        }
+        // Update motor
+        turretMotor.setTargetPosition((int) turretTargetGoal);
 
-        double polarCoordinateTargetToRobot =  Math.toDegrees(Math.atan2(targetPosition.getY() - follower.getPose().getY(), targetPosition.getX() - follower.getPose().getX()));
-        double degreesToTurnRaw = polarCoordinateTargetToRobot - turretPolarCoordinates;
+        // Telemetry
+        telemetry.addData("Target Angle", targetAngleDeg);
+        telemetry.addData("Turret Current Angle", turretCurrentDeg);
+        telemetry.addData("Delta Deg", deltaDeg);
+        telemetry.addData("Turret Target Clicks", turretTargetGoal);
 
-
-        if (degreesToTurnRaw + 360 < Math.abs(degreesToTurnRaw)){
-            degreesToTurnCorrected = degreesToTurnRaw + 360;
-        }else{
-            degreesToTurnCorrected = degreesToTurnRaw;
-        }
-
-        telemetry.addData("polar Corrdinate Target to robot: ", polarCoordinateTargetToRobot);
-        telemetry.addData("Deg To Turn Raw: ", degreesToTurnRaw);
-        telemetry.addData("Deg To Turn Corrected: ", degreesToTurnCorrected);
-
-        telemetry.addData("Turret Polar: ", turretPolarCoordinates);
-        turretTargetGoal = turretMotor.getCurrentPosition() + (degreesToTurnCorrected * degsPerClick);
 
     }
 }
