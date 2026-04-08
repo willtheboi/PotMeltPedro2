@@ -38,10 +38,6 @@ public class TeleopPedroTest2 extends OpMode {
 
     public static ElapsedTime timer = new ElapsedTime();
 
-    private boolean relocalizeToggle = false;
-    private boolean relocalizeButtonToggle = false;
-    double timeSinceLocalized = 0;
-
     Limelight3A limelight;
     private Follower follower;
     public static Pose startingPose;
@@ -51,18 +47,17 @@ public class TeleopPedroTest2 extends OpMode {
     private boolean slowMode = false;
     private double slowModeMultiplier = 0.5;
 
-    // Turret constants — corrected naming
-    public static final double TICKS_PER_REVOLUTION = 1445.58;
-    public static final double CLICKS_PER_DEG = TICKS_PER_REVOLUTION / 360.0; // ticks per degree
-    public static final double DEGS_PER_CLICK = 360.0 / TICKS_PER_REVOLUTION; // degrees per tick
-    public static final double MAX_TURRET_DEGREES = 298.0;                     // 1197 ticks / CLICKS_PER_DEG
+    // Turret constants — update 1800 to your actual CPR if needed
+    public double degsPerClick   = 360d  / 1445d; // degrees per encoder click
+    public double clicksPerDeg   = 1445d / 360d;  // encoder clicks per degree
+    // Hard limits in clicks (±1197 from your old code, adjust if needed)
+    private static final double TURRET_MAX_CLICKS = 1197;
 
-    // Target poses
     public Pose targetPoseBlue = new Pose(5, 142);
-    public Pose targetPoseRed = new Pose(140, 140);
+    public Pose targetPoseRed  = new Pose(142, 138);
 
     double turretTargetGoal = 0;
-    Pose botCameraPose;
+
     boolean opModeIsStarted = false;
 
     @Override
@@ -77,12 +72,12 @@ public class TeleopPedroTest2 extends OpMode {
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(45), 0.8))
                 .build();
 
-        intake = hardwareMap.get(DcMotor.class, "intake");
-        wheel = hardwareMap.get(CRServo.class, "wheel");
-        launcher1 = hardwareMap.get(DcMotorEx.class, "launcher1");
-        launcher2 = hardwareMap.get(DcMotorEx.class, "launcher2");
+        intake      = hardwareMap.get(DcMotor.class,   "intake");
+        wheel       = hardwareMap.get(CRServo.class,   "wheel");
+        launcher1   = hardwareMap.get(DcMotorEx.class, "launcher1");
+        launcher2   = hardwareMap.get(DcMotorEx.class, "launcher2");
         turretMotor = hardwareMap.get(DcMotorEx.class, "turret");
-        hood = hardwareMap.get(Servo.class, "hood");
+        hood        = hardwareMap.get(Servo.class,     "hood");
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(100);
@@ -93,11 +88,10 @@ public class TeleopPedroTest2 extends OpMode {
         launcher1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launcher2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        // Turret setup — power set once here, never again in turretMovement
         turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotor.setTargetPosition(0);
+        turretMotor.setPower(0.5);
         turretMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        turretMotor.setPower(0.3);
     }
 
     @Override
@@ -111,26 +105,18 @@ public class TeleopPedroTest2 extends OpMode {
         follower.update();
         telemetryM.update();
 
-        // Drive control
+        // ── Drivetrain ──────────────────────────────────────────────
         if (!automatedDrive) {
-            if (!slowMode) {
-                follower.setTeleOpDrive(
-                        -gamepad1.left_stick_y,
-                        -gamepad1.left_stick_x,
-                        -gamepad1.right_stick_x,
-                        true
-                );
-            } else {
-                follower.setTeleOpDrive(
-                        -gamepad1.left_stick_y * slowModeMultiplier,
-                        -gamepad1.left_stick_x * slowModeMultiplier,
-                        -gamepad1.right_stick_x * slowModeMultiplier,
-                        true
-                );
-            }
+            double scale = slowMode ? slowModeMultiplier : 1.0;
+            follower.setTeleOpDrive(
+                    -gamepad1.left_stick_y  * scale,
+                    -gamepad1.left_stick_x  * scale,
+                    -gamepad1.right_stick_x * scale,
+                    true // robot-centric
+            );
         }
 
-        // Intake control
+        // ── Intake ───────────────────────────────────────────────────
         if (gamepad2.left_bumper) {
             intake.setPower(-1);
             wheel.setPower(1);
@@ -142,33 +128,97 @@ public class TeleopPedroTest2 extends OpMode {
             wheel.setPower(0);
         }
 
-        // Hood control
-        if (gamepad2.dpad_up) {
-            hood.setPosition(0.58);
-        } else if (gamepad2.dpad_down) {
-            hood.setPosition(0.73);
-        }
+        // ── Hood ─────────────────────────────────────────────────────
+        if      (gamepad2.dpad_up)   hood.setPosition(0.58);
+        else if (gamepad2.dpad_down) hood.setPosition(0.73);
 
-        // Relocalization
+        // ── Limelight relocalization ──────────────────────────────────
         relocalizationUpdate(limelight, telemetry);
 
-        // Manual relocalize on A
         LLResult result = limelight.getLatestResult();
-        if (gamepad1.a && result != null && result.isValid()) {
+        if (gamepad1.a && result != null && result.isValid() && botCameraPose != null) {
             follower.setPose(botCameraPose);
         }
 
-        // Turret tracking — absolute positioning, no drift
-        turretMovement(true);
+        // ── Turret ───────────────────────────────────────────────────
+        if (opModeIsStarted) {
+            turretMovement();
+            telemetry.addData("Turret Clicks", turretMotor.getCurrentPosition());
+        }
 
-        // Launcher
+        // ── Launchers ────────────────────────────────────────────────
         launcher1.setVelocity(gamepad2.left_trigger * -1550);
         launcher2.setVelocity(gamepad2.left_trigger * -1550);
 
-        // Telemetry
-        telemetry.addData("Pedro Pose: ", follower.getPose());
-        telemetry.addData("Turret Current Ticks: ", turretMotor.getCurrentPosition());
+        telemetry.addData("Pedro Pose", follower.getPose());
         telemetry.update();
+    }
+
+    // ── Turret tracking ───────────────────────────────────────────────
+    public void turretMovement() {
+        Pose robotPose      = follower.getPose();
+        double robotHeadingDeg = Math.toDegrees(robotPose.getHeading()); // 0–360
+
+        // Current absolute turret angle on the field
+        double turretCurrentDeg = turretMotor.getCurrentPosition() * degsPerClick + robotHeadingDeg;
+
+        // Angle from robot to each goal
+        double angleToRed = Math.toDegrees(Math.atan2(
+                targetPoseRed.getY()  - robotPose.getY(),
+                targetPoseRed.getX()  - robotPose.getX()
+        ));
+        double angleToBlue = Math.toDegrees(Math.atan2(
+                targetPoseBlue.getY() - robotPose.getY(),
+                targetPoseBlue.getX() - robotPose.getX()
+        ));
+
+        // Pick whichever goal the robot is facing
+        double deltaToRed  = Math.abs(normalizeAngle(angleToRed  - robotHeadingDeg));
+        double deltaToBlue = Math.abs(normalizeAngle(angleToBlue - robotHeadingDeg));
+        boolean trackingRed = deltaToRed <= deltaToBlue;
+
+        double targetAngleDeg = trackingRed ? angleToRed : angleToBlue;
+
+        // How far does the turret need to rotate?
+        double deltaDeg = normalizeAngle(targetAngleDeg - turretCurrentDeg);
+
+        // Convert to clicks and clamp to physical limits
+        double rawTarget = turretMotor.getCurrentPosition() + deltaDeg * clicksPerDeg;
+        turretTargetGoal = Math.max(-TURRET_MAX_CLICKS, Math.min(TURRET_MAX_CLICKS, rawTarget));
+
+        turretMotor.setTargetPosition((int) turretTargetGoal);
+
+        telemetry.addData("Tracking",             trackingRed ? "RED" : "BLUE");
+        telemetry.addData("Target Angle (deg)",   targetAngleDeg);
+        telemetry.addData("Turret Angle (deg)",   turretCurrentDeg);
+        telemetry.addData("Delta (deg)",          deltaDeg);
+        telemetry.addData("Turret Target Clicks", turretTargetGoal);
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────
+    private double normalizeAngle(double angle) {
+        angle = angle % 360;
+        if (angle >  180) return angle - 360;
+        if (angle < -180) return angle + 360;
+        return angle;
+    }
+
+    Pose botCameraPose;
+    public void relocalizationUpdate(Limelight3A limelight, Telemetry telemetry) {
+        limelight.updateRobotOrientation(Math.toDegrees(follower.getHeading()));
+        LLResult result = limelight.getLatestResult();
+
+        if (result != null && result.isValid() && result.getFiducialResults().size() >= 1) {
+            double x = result.getBotpose_MT2().getPosition().x * 39.37008;
+            double y = result.getBotpose_MT2().getPosition().y * 39.37008;
+
+            Pose2D botpose2D = new Pose2D(DistanceUnit.INCH, x, y,
+                    AngleUnit.RADIANS, follower.getHeading());
+
+            Pose botPoseAsPedro = getFTCPoseAsPedro(botpose2D);
+            botCameraPose = new Pose(botPoseAsPedro.getX(), botPoseAsPedro.getY(), follower.getHeading());
+            telemetry.addData("Limelight Pose (Pedro)", botCameraPose);
+        }
     }
 
     private Pose getFTCPoseAsPedro(Pose2D ftcPose) {
@@ -177,56 +227,5 @@ public class TeleopPedroTest2 extends OpMode {
                 Math.abs(ftcPose.getX(DistanceUnit.INCH) - 72),
                 follower.getHeading()
         );
-    }
-
-    public void relocalizationUpdate(Limelight3A limelight, Telemetry telemetry) {
-        LLResult result = limelight.getLatestResult();
-
-        if (result != null && result.isValid()) {
-            Pose2D botpose2D = new Pose2D(
-                    DistanceUnit.INCH,
-                    result.getBotpose().getPosition().x * 39.37008,
-                    result.getBotpose().getPosition().y * 39.37008,
-                    AngleUnit.RADIANS,
-                    follower.getHeading()
-            );
-
-            Pose botPoseAsPedro = getFTCPoseAsPedro(botpose2D);
-            botCameraPose = new Pose(botPoseAsPedro.getX(), botPoseAsPedro.getY(), follower.getHeading());
-
-            telemetry.addData("Limelight Pose As Pedro: ", botCameraPose);
-        }
-    }
-
-    public void turretMovement(boolean isRed) {
-        Pose targetPosition = isRed ? targetPoseRed : targetPoseBlue;
-
-        // Field-space angle from robot to target (radians, then degrees)
-        double angleToTargetDeg = Math.toDegrees(Math.atan2(
-                targetPosition.getY() - follower.getPose().getY(),
-                targetPosition.getX() - follower.getPose().getX()
-        ));
-
-        // Pedro heading is radians, CCW positive — convert to degrees
-        double robotHeadingDeg = Math.toDegrees(follower.getPose().getHeading());
-
-        // How far turret must rotate relative to robot forward
-        double turretAngleDeg = angleToTargetDeg - robotHeadingDeg;
-
-        // Normalize to [-180, 180] to always take the shortest path
-        turretAngleDeg = ((turretAngleDeg % 360) + 360) % 360;
-        if (turretAngleDeg > 180) turretAngleDeg -= 360;
-
-        // Clamp to physical limits (±1197 ticks = ±298 degrees)
-        turretAngleDeg = Math.max(-MAX_TURRET_DEGREES, Math.min(MAX_TURRET_DEGREES, turretAngleDeg));
-
-        // Absolute tick target — no drift, no accumulation
-        turretTargetGoal = turretAngleDeg * CLICKS_PER_DEG;
-        turretMotor.setTargetPosition((int) turretTargetGoal);
-
-        telemetry.addData("Angle To Target (deg): ", angleToTargetDeg);
-        telemetry.addData("Robot Heading (deg): ", robotHeadingDeg);
-        telemetry.addData("Turret Angle (deg): ", turretAngleDeg);
-        telemetry.addData("Turret Target Ticks: ", turretTargetGoal);
     }
 }
