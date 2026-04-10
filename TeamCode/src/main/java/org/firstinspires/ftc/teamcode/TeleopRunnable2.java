@@ -13,7 +13,7 @@ public class TeleopRunnable2 extends teleop2 {
     // Example: Add logic here if you want to control arms, intake, etc.
 
         /*switch (getPathState()) {
-            case 1:
+            case 1
                 //launcherL.setPower(1.0);
                 SystemClock.sleep(200);
             case 3:
