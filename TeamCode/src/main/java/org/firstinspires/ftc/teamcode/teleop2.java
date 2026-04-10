@@ -60,6 +60,7 @@ public abstract class teleop2 extends OpMode {
     public static double Kd = 0.01;*/
 
     public int turretLock;
+    public int speed = 1320;
 
     @Override
     public void init() {
@@ -104,8 +105,8 @@ public abstract class teleop2 extends OpMode {
         // Set intake motors to brake as well (optional, if you want them to stop more forcefully)
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        launcher1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        launcher2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //launcher1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //launcher2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
     }
 
@@ -137,12 +138,14 @@ public abstract class teleop2 extends OpMode {
         }
         if (gamepad2.dpad_up) {
             hood.setPosition(0.58); //highest position
+            speed = 1650;
         }
         else if (gamepad2.dpad_down) {
             hood.setPosition(0.73); //lowest position
+            speed = 1150;
         }
-        launcher1.setVelocity(gamepad2.right_trigger*-1400);
-        launcher2.setVelocity(gamepad2.left_trigger*-1400);
+        launcher1.setVelocity(100+gamepad2.left_trigger*-speed);
+        launcher2.setVelocity(100+gamepad2.left_trigger*-speed);
 
         double strafe = gamepad2.left_stick_x;
         drive(-gamepad2.left_stick_y, strafe, gamepad2.right_stick_x);

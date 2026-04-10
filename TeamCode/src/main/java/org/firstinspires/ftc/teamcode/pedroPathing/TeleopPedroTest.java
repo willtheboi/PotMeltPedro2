@@ -178,7 +178,7 @@ public class TeleopPedroTest extends OpMode {
             }
         }
 
-        relocalizationUpdate(limelight, telemetry);
+        //relocalizationUpdate(limelight, telemetry);
         turretMovement(true);
 
         if (opModeIsStarted) {
@@ -206,7 +206,7 @@ public class TeleopPedroTest extends OpMode {
     }
 
     Pose botCameraPose;
-    public void relocalizationUpdate(Limelight3A limelight, Telemetry telemetry){
+   /* public void relocalizationUpdate(Limelight3A limelight, Telemetry telemetry){
         LLResult result = limelight.getLatestResult();
         Pose2D botpose2D;
         Pose botPoseAsPedro;
@@ -216,18 +216,18 @@ public class TeleopPedroTest extends OpMode {
 
                 relocalizeToggle = true;
 
-                botpose2D = new Pose2D(DistanceUnit.INCH, result.getBotpose().getPosition().x * 39.37008, result.getBotpose().getPosition().y * 39.37008, AngleUnit.RADIANS, PedroComponent.follower().getHeading());
-                botPoseAsPedro = getFTCPoseAsPedro(botpose2D);
+         //       botpose2D = new Pose2D(DistanceUnit.INCH, result.getBotpose().getPosition().x * 39.37008, result.getBotpose().getPosition().y * 39.37008, AngleUnit.RADIANS, PedroComponent.follower().getHeading());
+     //           botPoseAsPedro = getFTCPoseAsPedro(botpose2D);
 
                 telemetry.addData("Limelight Coordinates As Pedro: ", getFTCPoseAsPedro(botpose2D));
 
-                botCameraPose = new Pose(botPoseAsPedro.getX(), botPoseAsPedro.getY(), PedroComponent.follower().getHeading());
+           //     botCameraPose = new Pose(botPoseAsPedro.getX(), botPoseAsPedro.getY(), PedroComponent.follower().getHeading());
             } else {
                 relocalizeToggle = false;
             }
 
         }
-    }
+    }*/
 
     private double normalizeAngle(double angle) {
         angle = angle % 360;

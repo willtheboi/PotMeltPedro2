@@ -107,6 +107,7 @@ public abstract class Teleop extends OpMode {
         launcher1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launcher2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        turretLock = turret.getCurrentPosition();
     }
 
     @Override
@@ -121,6 +122,7 @@ public abstract class Teleop extends OpMode {
         //telemetry.addData("Servo Speed", feederR.getPower());
         telemetry.update();
 
+        turret.setTargetPosition(turretLock);
 
         if (gamepad2.left_bumper) {
             intake.setPower(-1);
@@ -141,8 +143,8 @@ public abstract class Teleop extends OpMode {
         else if (gamepad2.dpad_down) {
             hood.setPosition(0.73); //lowest position
         }
-        launcher1.setVelocity(gamepad2.left_trigger*-1400);
-        launcher2.setVelocity(gamepad2.left_trigger*-1400);
+        launcher1.setVelocity(gamepad2.left_trigger*-1550);
+        launcher2.setVelocity(gamepad2.left_trigger*-1550);
 
         double strafe = gamepad1.right_trigger - gamepad1.left_trigger;
         drive(-gamepad1.left_stick_y, strafe, gamepad1.right_stick_x);
