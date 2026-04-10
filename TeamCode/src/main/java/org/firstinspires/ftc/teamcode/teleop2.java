@@ -41,7 +41,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 //@Disabled
 
-public abstract class Teleop extends OpMode {
+public abstract class teleop2 extends OpMode {
     // This declares the motors needed
     DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
     DcMotor intake;
@@ -141,11 +141,11 @@ public abstract class Teleop extends OpMode {
         else if (gamepad2.dpad_down) {
             hood.setPosition(0.73); //lowest position
         }
-        launcher1.setVelocity(gamepad2.left_trigger*-1400);
+        launcher1.setVelocity(gamepad2.right_trigger*-1400);
         launcher2.setVelocity(gamepad2.left_trigger*-1400);
 
-        double strafe = gamepad1.right_trigger - gamepad1.left_trigger;
-        drive(-gamepad1.left_stick_y, strafe, gamepad1.right_stick_x);
+        double strafe = gamepad2.left_stick_x;
+        drive(-gamepad2.left_stick_y, strafe, gamepad2.right_stick_x);
 
         /*LPID(targetVelocity, launcher.getVelocity());*/
     }
