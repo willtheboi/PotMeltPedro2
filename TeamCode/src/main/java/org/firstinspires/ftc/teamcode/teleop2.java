@@ -92,8 +92,8 @@ public abstract class teleop2 extends OpMode {
         frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        launcher1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        launcher2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        launcher1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        launcher2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         turret.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         // Set all drive motors to brake when power is zero
@@ -107,6 +107,9 @@ public abstract class teleop2 extends OpMode {
         turret.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //launcher1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //launcher2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        launcher1.setVelocityPIDFCoefficients(5,0.1,0,11);
+        launcher2.setVelocityPIDFCoefficients(5,0.1,0,11);
 
     }
 
@@ -142,7 +145,7 @@ public abstract class teleop2 extends OpMode {
         }
         else if (gamepad2.dpad_down) {
             hood.setPosition(0.73); //lowest position
-            speed = 1150;
+            speed = 1300;
         }
         launcher1.setVelocity(100+gamepad2.left_trigger*-speed);
         launcher2.setVelocity(100+gamepad2.left_trigger*-speed);
