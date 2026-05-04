@@ -127,6 +127,11 @@ public abstract class PotMeltAutoGoalsideB extends OpMode {
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launcher1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launcher2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcher1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        launcher2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        launcher1.setVelocityPIDFCoefficients(5,0.1,0,11);
+        launcher2.setVelocityPIDFCoefficients(5,0.1,0,11);
 
         pathTimer = new Timer();
         opmodeTimer = new Timer();

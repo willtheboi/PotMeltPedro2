@@ -42,9 +42,9 @@ public abstract class PotMeltAutoBasesideR extends OpMode {
     public void launch(double power) {
         launcher1.setVelocity(-power);
         launcher2.setVelocity(-power);
-        SystemClock.sleep(200);
-        intake.setPower(0.6);
-        wheel.setPower(0.6);
+        SystemClock.sleep(500);
+        intake.setPower(0.8);
+        wheel.setPower(1);
         SystemClock.sleep(2000);
         launcher1.setVelocity(0);
         launcher2.setVelocity(0);
@@ -112,6 +112,15 @@ public abstract class PotMeltAutoBasesideR extends OpMode {
         follower = Constants.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
+
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcher1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcher2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcher1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        launcher2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        launcher1.setVelocityPIDFCoefficients(5,0.1,0,11);
+        launcher2.setVelocityPIDFCoefficients(5,0.1,0,11);
     }
 
     @Override
@@ -130,9 +139,9 @@ public abstract class PotMeltAutoBasesideR extends OpMode {
                 intake.setPower(0);
                 wheel.setPower(0);
                 intake.setPower(0);
-                hood.setPosition(0.6);
-                launcher1.setPower(-1590);
-                launcher2.setPower(-1590);
+                hood.setPosition(0.58);
+                launcher1.setPower(-1550);
+                launcher2.setPower(-1550);
                 sleep(500);
                 follower.followPath(launchPath1);
                 setPathState(1);
@@ -155,14 +164,12 @@ public abstract class PotMeltAutoBasesideR extends OpMode {
                 break;
             case 3:
                 if (!follower.isBusy()) {
-                    sleep(500);
-                    intake.setPower(0.05);
                     //no_suck();
                     wheel.setPower(-0.6);
-                    sleep(500);
-                    launcher1.setPower(-1500);
-                    launcher2.setPower(-1500);
                     sleep(1000);
+                    launcher1.setPower(-1550);
+                    launcher2.setPower(-1550);
+                    sleep(500);
                     follower.followPath(launchPath2);
                     setPathState(4);
                 }
@@ -170,7 +177,7 @@ public abstract class PotMeltAutoBasesideR extends OpMode {
 
             case 4:
                 if (!follower.isBusy()) {
-                    launch(1520);
+                    launch(1550);
                     follower.followPath(parkPath);
                     setPathState(-1);
                 }
